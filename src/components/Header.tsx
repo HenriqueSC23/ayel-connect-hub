@@ -27,7 +27,7 @@ import {
   Search,
 } from "lucide-react";
 import { useState } from "react";
-import logo from "@/assets/ayel-logo.png";
+import logo from "@/assets/ayel-logo.jpg";
 
 export const Header = () => {
   const { user, logout, isAdmin } = useAuth();
