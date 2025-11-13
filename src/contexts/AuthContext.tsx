@@ -170,7 +170,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // ============================================
   // HELPER: Verifica se usuário é admin
   // ============================================
-  const isAdmin = user?.role === "admin";
+  // Considera superadmin como tendo permissões administrativas também
+  const isAdmin = user?.role === "admin" || user?.role === "superadmin";
 
   // Valor do contexto disponível para toda aplicação
   const value: AuthContextType = {

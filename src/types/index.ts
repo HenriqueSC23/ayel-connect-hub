@@ -15,7 +15,7 @@ export type UserCategory =
   | "outros";
 
 // Tipo de usuário (define permissões)
-export type UserRole = "admin" | "user";
+export type UserRole = "superadmin" | "admin" | "user";
 
 // ============================================
 // USUÁRIO
@@ -28,8 +28,9 @@ export interface User {
   email: string;                 // Email corporativo
   password: string;              // ATENÇÃO: No backend, sempre usar hash (bcrypt)
   fullName: string;              // Nome completo
-  role: UserRole;                // admin ou user
+  role: UserRole;                // superadmin | admin | user
   category: UserCategory;        // Categoria do colaborador
+  companyId?: string;            // Empresa à qual o usuário pertence (omitido para superadmin)
   setor?: string;                // Setor/departamento
   birthDate?: string;            // Data de nascimento (formato: YYYY-MM-DD)
   photoUrl?: string;             // URL da foto (armazenar no storage/S3)
@@ -51,6 +52,7 @@ export interface Post {
   targetCategory: UserCategory | "todos";  // Para quem o post é visível
   likes: string[];               // Array de user IDs que curtiram
   createdAt: string;             // Data de criação
+  companyId?: string;            // Empresa proprietária do post
 }
 
 // ============================================
@@ -81,6 +83,7 @@ export interface Event {
   color: string;                 // Cor para exibição (hex ou classe CSS)
   createdBy: string;             // Foreign key para users.id
   createdAt: string;             // Data de criação
+  companyId?: string;
 }
 
 // ============================================
@@ -96,6 +99,7 @@ export interface Collaborator {
   setor?: string;                // user.setor
   birthDate?: string;            // user.birthDate
   photoUrl?: string;             // user.photoUrl
+  companyId?: string;
 }
 
 // ============================================
@@ -112,6 +116,19 @@ export interface Shortcut {
   category?: string;             // Categoria do link (opcional)
   createdBy: string;             // Foreign key para users.id
   createdAt: string;             // Data de criação
+  companyId?: string;
+}
+
+// ============================================
+// EMPRESA
+// ============================================
+export interface Company {
+  id: string;
+  nome: string;
+  cnpj?: string;
+  logo?: string;
+  brandColor?: string;
+  createdAt: string;
 }
 
 // ============================================

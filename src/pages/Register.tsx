@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserCategory } from "@/types";
-import logo from "@/assets/ayel-logo.png";
+import logo from "@/assets/ayel-logo.jpg";
 
 const Register = () => {
   const [formData, setFormData] = useState({

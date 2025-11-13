@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, ArrowLeft } from "lucide-react";
-import logo from "@/assets/ayel-logo.png";
+import logo from "@/assets/ayel-logo.jpg";
 
 const PasswordRecovery = () => {
   const [email, setEmail] = useState("");

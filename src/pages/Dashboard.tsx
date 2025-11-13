@@ -34,6 +34,7 @@ import { posts as mockPosts } from "@/data/mockData";
 const Dashboard = () => {
   const { user, isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [adminFilter, setAdminFilter] = useState<UserCategory | "todos">("todos");
   
   // Estado para novo post
   const [newPost, setNewPost] = useState({
@@ -48,6 +49,13 @@ const Dashboard = () => {
   const visiblePosts = user
     ? getPostsByUserCategory(user.category)
     : mockPosts;
+
+  // Caso seja admin, permite filtrar o feed por categoria (ou ver todos)
+  const postsToShow = isAdmin
+    ? adminFilter === "todos"
+      ? mockPosts
+      : mockPosts.filter((p) => p.targetCategory === adminFilter)
+    : visiblePosts;
 
   // ============================================
   // HANDLER: Criar novo post (apenas Admin)
@@ -201,16 +209,39 @@ const Dashboard = () => {
           </Dialog>
         )}
 
+        {/* Filtro (apenas Admin) */}
+        {isAdmin && (
+          <div className="mb-6">
+            <Label htmlFor="filter">Filtrar posts por categoria</Label>
+            <div className="mt-2">
+              <Select
+                value={adminFilter}
+                onValueChange={(value: UserCategory | "todos") => setAdminFilter(value)}
+              >
+                <SelectTrigger id="filter">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  <SelectItem value="todos">Todos os posts</SelectItem>
+                  <SelectItem value="vendedor">Vendedores</SelectItem>
+                  <SelectItem value="tecnico">Técnicos</SelectItem>
+                  <SelectItem value="rh">RH</SelectItem>
+                  <SelectItem value="administrativo">Administrativo</SelectItem>
+                  <SelectItem value="outros">Outros</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
         {/* Feed de posts */}
         <div className="space-y-6">
-          {visiblePosts.length === 0 ? (
+          {postsToShow.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                Nenhum post publicado ainda.
-              </p>
+              <p className="text-muted-foreground">Nenhum post publicado ainda.</p>
             </div>
           ) : (
-            visiblePosts.map((post) => <PostCard key={post.id} post={post} />)
+            postsToShow.map((post) => <PostCard key={post.id} post={post} />)
           )}
         </div>
       </main>

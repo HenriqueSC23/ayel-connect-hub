@@ -31,6 +31,7 @@ import {
   Shortcut,
   UserCategory 
 } from "@/types";
+import { Company } from "@/types";
 
 // ============================================
 // USUÁRIOS
@@ -44,7 +45,7 @@ export const users: User[] = [
     email: "admin@ayel.com.br",
     password: "admin123", // ⚠️ NUNCA armazene senha em texto plano no backend!
     fullName: "Administrador Sistema",
-    role: "admin",
+    role: "superadmin",
     category: "administrativo",
     setor: "TI",
     birthDate: "1990-05-15",
@@ -56,11 +57,12 @@ export const users: User[] = [
     email: "joao.silva@ayel.com.br",
     password: "123456",
     fullName: "João Silva",
-    role: "user",
+    role: "admin",
     category: "vendedor",
     setor: "Vendas",
     birthDate: "1992-03-20",
     photoUrl: "https://i.pravatar.cc/150?img=12",
+    companyId: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -74,6 +76,7 @@ export const users: User[] = [
     setor: "Suporte Técnico",
     birthDate: "1988-07-10",
     photoUrl: "https://i.pravatar.cc/150?img=5",
+    companyId: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -87,6 +90,7 @@ export const users: User[] = [
     setor: "Recursos Humanos",
     birthDate: "1985-11-25",
     photoUrl: "https://i.pravatar.cc/150?img=8",
+    companyId: "c2",
     createdAt: new Date().toISOString(),
   },
   {
@@ -100,6 +104,29 @@ export const users: User[] = [
     setor: "Vendas",
     birthDate: "1995-12-05",
     photoUrl: "https://i.pravatar.cc/150?img=9",
+    companyId: "c2",
+    createdAt: new Date().toISOString(),
+  },
+];
+
+// ============================================
+// EMPRESAS (MULTIEMPRESA)
+// ============================================
+export const companies: Company[] = [
+  {
+    id: "c1",
+    nome: "Ayel Segurança",
+    cnpj: "12.345.678/0001-90",
+    logo: "/src/assets/ayel-logo.jpg",
+    brandColor: "#3B82F6",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "c2",
+    nome: "Ayel Tecnologia",
+    cnpj: "98.765.432/0001-10",
+    logo: "/src/assets/ayel-logo.jpg",
+    brandColor: "#10B981",
     createdAt: new Date().toISOString(),
   },
 ];
@@ -119,6 +146,7 @@ export const posts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
     targetCategory: "todos",
     likes: ["2", "3", "4"],
+    companyId: "c1",
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
@@ -130,6 +158,7 @@ export const posts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1484788984921-03950022c9ef?w=800&q=80",
     targetCategory: "tecnico",
     likes: ["3"],
+    companyId: "c1",
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
@@ -139,6 +168,7 @@ export const posts: Post[] = [
     content: "🎯 Meta do mês batida! Parabéns à equipe de vendas pelo excelente desempenho. Continuem assim!",
     targetCategory: "vendedor",
     likes: ["2", "5"],
+    companyId: "c2",
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
 ];
@@ -189,6 +219,7 @@ export const events: Event[] = [
     type: "feriado",
     color: "#EF4444",
     createdBy: "1",
+    companyId: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -199,6 +230,7 @@ export const events: Event[] = [
     type: "pagamento",
     color: "#10B981",
     createdBy: "1",
+    companyId: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -209,6 +241,7 @@ export const events: Event[] = [
     type: "reuniao",
     color: "#3B82F6",
     createdBy: "1",
+    companyId: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -219,6 +252,7 @@ export const events: Event[] = [
     type: "treinamento",
     color: "#F59E0B",
     createdBy: "1",
+    companyId: "c2",
     createdAt: new Date().toISOString(),
   },
   {
@@ -229,6 +263,7 @@ export const events: Event[] = [
     type: "feriado",
     color: "#EF4444",
     createdBy: "1",
+    companyId: "c2",
     createdAt: new Date().toISOString(),
   },
 ];
@@ -246,6 +281,7 @@ export const collaborators: Collaborator[] = users.map(user => ({
   setor: user.setor,
   birthDate: user.birthDate,
   photoUrl: user.photoUrl,
+  companyId: user.companyId,
 }));
 
 // ============================================
@@ -262,6 +298,7 @@ export const shortcuts: Shortcut[] = [
     icon: "Users",
     category: "interno",
     createdBy: "1",
+    companyId: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -272,6 +309,7 @@ export const shortcuts: Shortcut[] = [
     icon: "ShoppingCart",
     category: "interno",
     createdBy: "1",
+    companyId: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -282,6 +320,7 @@ export const shortcuts: Shortcut[] = [
     icon: "Wrench",
     category: "interno",
     createdBy: "1",
+    companyId: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -292,6 +331,7 @@ export const shortcuts: Shortcut[] = [
     icon: "Mail",
     category: "externo",
     createdBy: "1",
+    companyId: "c2",
     createdAt: new Date().toISOString(),
   },
   {
@@ -302,6 +342,7 @@ export const shortcuts: Shortcut[] = [
     icon: "FolderOpen",
     category: "interno",
     createdBy: "1",
+    companyId: "c2",
     createdAt: new Date().toISOString(),
   },
   {
@@ -312,9 +353,40 @@ export const shortcuts: Shortcut[] = [
     icon: "Shield",
     category: "externo",
     createdBy: "1",
+    companyId: "c2",
     createdAt: new Date().toISOString(),
   },
 ];
+
+// ============================================
+// HELPERS: Companies CRUD (in-memory/mock)
+// ============================================
+export const createCompany = async (companyData: Omit<Company, "id" | "createdAt">): Promise<Company> => {
+  await simulateNetworkDelay();
+  const newCompany: Company = {
+    ...companyData,
+    id: `c${companies.length + 1}`,
+    createdAt: new Date().toISOString(),
+  };
+  companies.push(newCompany);
+  return newCompany;
+};
+
+export const updateCompany = async (id: string, data: Partial<Company>): Promise<Company | null> => {
+  await simulateNetworkDelay();
+  const idx = companies.findIndex(c => c.id === id);
+  if (idx === -1) return null;
+  companies[idx] = { ...companies[idx], ...data };
+  return companies[idx];
+};
+
+export const deleteCompany = async (id: string): Promise<boolean> => {
+  await simulateNetworkDelay();
+  const idx = companies.findIndex(c => c.id === id);
+  if (idx === -1) return false;
+  companies.splice(idx, 1);
+  return true;
+};
 
 // ============================================
 // FUNÇÕES HELPER PARA SIMULAÇÃO DE API

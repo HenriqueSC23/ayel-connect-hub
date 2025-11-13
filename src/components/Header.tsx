@@ -60,175 +60,123 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <img src={logo} alt="Ayel Segurança e Tecnologia" className="h-10" />
-        </Link>
+    <>
+      {/* Sidebar for desktop */}
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-64 border-r bg-background/95 z-50">
+        <div className="flex h-16 items-center px-4 border-b">
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Ayel Segurança e Tecnologia" className="h-10" />
+          </Link>
+        </div>
 
-        {/* Navegação Principal - Desktop */}
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
           <Link to="/">
-            <Button
-              variant={isActive("/") ? "secondary" : "ghost"}
-              size="sm"
-              className="gap-2"
-            >
-              <Home className="h-4 w-4" />
-              Mural
+            <Button variant={isActive("/") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+              <Home className="h-5 w-5" />
+              <span>Mural</span>
             </Button>
           </Link>
 
           <Link to="/agenda">
-            <Button
-              variant={isActive("/agenda") ? "secondary" : "ghost"}
-              size="sm"
-              className="gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Agenda
+            <Button variant={isActive("/agenda") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+              <Calendar className="h-5 w-5" />
+              <span>Agenda</span>
             </Button>
           </Link>
 
           <Link to="/aniversariantes">
-            <Button
-              variant={isActive("/aniversariantes") ? "secondary" : "ghost"}
-              size="sm"
-              className="gap-2"
-            >
-              <Cake className="h-4 w-4" />
-              Aniversariantes
+            <Button variant={isActive("/aniversariantes") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+              <Cake className="h-5 w-5" />
+              <span>Aniversariantes</span>
             </Button>
           </Link>
 
           <Link to="/colaboradores">
-            <Button
-              variant={isActive("/colaboradores") ? "secondary" : "ghost"}
-              size="sm"
-              className="gap-2"
-            >
-              <Users className="h-4 w-4" />
-              Colaboradores
+            <Button variant={isActive("/colaboradores") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+              <Users className="h-5 w-5" />
+              <span>Colaboradores</span>
             </Button>
           </Link>
 
           <Link to="/atalhos">
-            <Button
-              variant={isActive("/atalhos") ? "secondary" : "ghost"}
-              size="sm"
-              className="gap-2"
-            >
-              <LinkIcon className="h-4 w-4" />
-              Atalhos
+            <Button variant={isActive("/atalhos") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+              <LinkIcon className="h-5 w-5" />
+              <span>Atalhos</span>
             </Button>
           </Link>
 
-          {/* Link Admin (apenas para admins) */}
           {isAdmin && (
             <Link to="/admin">
-              <Button
-                variant={isActive("/admin") ? "secondary" : "ghost"}
-                size="sm"
-                className="gap-2"
-              >
-                <Shield className="h-4 w-4" />
-                Admin
+              <Button variant={isActive("/admin") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+                <Shield className="h-5 w-5" />
+                <span>Admin</span>
               </Button>
             </Link>
           )}
         </nav>
 
-        {/* Busca e Perfil */}
-        <div className="flex items-center gap-2">
-          {/* Botão de busca (pode ser implementado depois) */}
-          <Button variant="ghost" size="icon" className="hidden md:flex">
-            <Search className="h-5 w-5" />
-          </Button>
-
-          {/* Dropdown do Usuário */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.photoUrl} alt={user?.fullName} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {getInitials(user?.fullName || "U")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden md:flex flex-col items-start text-sm">
-                  <span className="font-medium">{user?.fullName}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {user?.category && getCategoryLabel(user.category)}
-                  </span>
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-popover">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.fullName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.category && getCategoryLabel(user.category)}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-
-              {/* Menu Mobile - Links de navegação */}
-              <div className="md:hidden">
-                <DropdownMenuItem asChild>
-                  <Link to="/" className="w-full cursor-pointer">
-                    <Home className="mr-2 h-4 w-4" />
-                    Mural
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/agenda" className="w-full cursor-pointer">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Agenda
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/aniversariantes" className="w-full cursor-pointer">
-                    <Cake className="mr-2 h-4 w-4" />
-                    Aniversariantes
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/colaboradores" className="w-full cursor-pointer">
-                    <Users className="mr-2 h-4 w-4" />
-                    Colaboradores
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/atalhos" className="w-full cursor-pointer">
-                    <LinkIcon className="mr-2 h-4 w-4" />
-                    Atalhos
-                  </Link>
-                </DropdownMenuItem>
-                {isAdmin && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin" className="w-full cursor-pointer">
-                      <Shield className="mr-2 h-4 w-4" />
-                      Admin
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
+        <div className="px-3 py-4 border-t">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user?.photoUrl} alt={user?.fullName} />
+                <AvatarFallback className="bg-primary text-primary-foreground">{getInitials(user?.fullName || "U")}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="font-medium text-sm">{user?.fullName}</span>
+                <span className="text-xs text-muted-foreground">{user?.category && getCategoryLabel(user.category)}</span>
               </div>
-
-              <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </div>
+            <Button variant="ghost" onClick={logout} className="text-destructive">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
-    </header>
+      </aside>
+
+      {/* Spacer so main content is not under the fixed sidebar */}
+      <div className="hidden md:block md:w-64" />
+
+      {/* Mobile header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
+        <div className="container flex h-16 items-center justify-between px-4">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Ayel Segurança e Tecnologia" className="h-10" />
+          </Link>
+
+          {/* Mobile right controls */}
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon">
+              <Search className="h-5 w-5" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.photoUrl} alt={user?.fullName} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">{getInitials(user?.fullName || "U")}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-popover">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user?.fullName}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user?.category && getCategoryLabel(user.category)}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </header>
+    </>
   );
 };

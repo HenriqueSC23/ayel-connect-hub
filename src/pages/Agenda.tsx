@@ -3,11 +3,30 @@ import { useMemo, useState } from "react";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { events } from "@/data/mockData";
+import { events as mockEvents } from "@/data/mockData";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Event } from "@/types";
 
 const Agenda = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -17,19 +36,43 @@ const Agenda = () => {
     ).padStart(2, "0")}`;
   };
 
+  const keyToDate = (key: string) => {
+    const [y, m, d] = key.split("-").map((n) => Number(n));
+    return new Date(y, m - 1, d);
+  };
+
+  // UX state: local events copy (so we can mutate in UI), filters and create modal
+  const [localEvents, setLocalEvents] = useState<Event[]>([...mockEvents]);
+  const [filters, setFilters] = useState<string[]>([]); // empty = all
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newEvent, setNewEvent] = useState({
+    title: "",
+    description: "",
+    date: "",
+    type: "outro",
+    color: "#3B82F6",
+  });
+
   // Normaliza datas para o dia local (evita problemas de fuso)
+  // Filtra eventos de acordo com filtros selecionados
+  const filteredEvents = useMemo(() => {
+    if (!filters || filters.length === 0) return localEvents;
+    return localEvents.filter((ev) => filters.includes(ev.type));
+  }, [localEvents, filters]);
+
+  // Cria Dates locais a partir das strings 'YYYY-MM-DD' (evita parseISO/UTC)
   const eventDates = useMemo(() => {
-    return events.map((e) => {
-      const d = parseISO(e.date);
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    return filteredEvents.map((e) => {
+      const [y, m, d] = e.date.split("-").map((n) => Number(n));
+      return new Date(y, m - 1, d);
     });
-  }, []);
+  }, [filteredEvents]);
 
   const eventsByDate = useMemo(() => {
-    const map: Record<string, typeof events> = {};
-    events.forEach((ev) => {
-      const d = parseISO(ev.date);
-      const key = toKey(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
+    const map: Record<string, Event[]> = {};
+    filteredEvents.forEach((ev) => {
+      // Presume ev.date está no formato 'YYYY-MM-DD' e usa a string como chave
+      const key = ev.date;
       if (!map[key]) map[key] = [] as any;
       map[key].push(ev);
     });
@@ -52,6 +95,7 @@ const Agenda = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0 h-full">
+              <TooltipProvider>
               <Calendar
                 className="h-full"
                 mode="single"
@@ -59,31 +103,46 @@ const Agenda = () => {
                 onDayClick={(day) => setSelectedDate(day || undefined)}
                 modifiers={{ hasEvent: eventDates }}
                 modifiersClassNames={{ hasEvent: "ring-2 ring-primary/50 rounded-full" }}
-                dayContent={(date) => {
-                  const key = toKey(date);
-                  const evs = eventsByDate[key] || [];
-                  if (evs.length === 0) return <div className="w-full h-full" />;
-                  return (
-                    <div className="w-full h-full flex flex-col items-center justify-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="text-[0.72rem]">{date.getDate()}</div>
-                        <div className="flex items-center gap-1">
-                          {evs.slice(0, 3).map((ev) => (
-                            <span key={ev.id} className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: ev.color }} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
+                components={{
+                  Day: ({ date, ...dayProps }: any) => {
+                    const key = toKey(date);
+                    const evs = eventsByDate[key] || [];
+                    const title = evs.length === 0 ? "" : evs.map((x: any) => x.title).join("\n");
+                    return (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div {...dayProps} className={`w-full h-full flex flex-col items-center justify-center ${dayProps.className || ""}`}>
+                            <div className="flex flex-col items-center gap-1">
+                              <div className="text-[0.72rem]">{date.getDate()}</div>
+                              <div className="flex items-center gap-1 mt-1">
+                                {evs.slice(0, 3).map((ev: any) => (
+                                  <span key={ev.id} className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: ev.color }} />
+                                ))}
+                                {evs.length > 3 && (
+                                  <span className="text-[0.65rem] text-muted-foreground">+{evs.length - 3}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        {evs.length > 0 && (
+                          <TooltipContent>
+                            <div className="whitespace-pre-line max-w-xs">{title}</div>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    );
+                  },
                 }}
               />
+              </TooltipProvider>
             </CardContent>
           </Card>
 
           <div>
             <Card>
-              <CardHeader>
-                <CardTitle>Eventos {selectedKey ? `em ${format(new Date(selectedKey), "dd/MM/yyyy")}` : "do mês"}</CardTitle>
+                <CardHeader>
+                <CardTitle>Eventos {selectedKey ? `em ${format(keyToDate(selectedKey as string), "dd/MM/yyyy")}` : "do mês"}</CardTitle>
               </CardHeader>
               <CardContent>
                 {selectedKey ? (
@@ -101,7 +160,7 @@ const Agenda = () => {
                               <h3 className="font-medium">{ev.title}</h3>
                               <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                                 <Clock className="h-3 w-3" />
-                                {format(new Date(ev.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                                {format(keyToDate(ev.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                               </p>
                             </div>
                           </div>
@@ -120,7 +179,7 @@ const Agenda = () => {
                       .sort()
                       .map((dateKey) => (
                         <div key={dateKey} className="mb-4">
-                          <h4 className="font-semibold">{format(new Date(dateKey), "dd 'de' MMMM", { locale: ptBR })}</h4>
+                          <h4 className="font-semibold">{format(keyToDate(dateKey), "dd 'de' MMMM", { locale: ptBR })}</h4>
                           {(eventsByDate[dateKey] || []).map((ev) => (
                             <div key={ev.id} className="mt-2 p-3 bg-muted/5 rounded-md">
                               <div className="flex items-start justify-between">
