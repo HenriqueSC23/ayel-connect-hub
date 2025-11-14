@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { events as mockEvents } from "@/data/mockData";
+import { events as mockEvents, companies as mockCompanies } from "@/data/mockData";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,7 +26,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Event } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CompanyTarget, Event, PostRoleTarget } from "@/types";
+
+const roleFilterOptions: { label: string; value: PostRoleTarget }[] = [
+  { label: "Todos os setores", value: "all" },
+  { label: "Vendedores", value: "vendedor" },
+  { label: "Técnicos", value: "tecnico" },
+  { label: "RH", value: "rh" },
+  { label: "Administrativo", value: "administrativo" },
+  { label: "Outros", value: "outros" },
+];
 
 const Agenda = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -41,9 +57,10 @@ const Agenda = () => {
     return new Date(y, m - 1, d);
   };
 
-  // UX state: local events copy (so we can mutate in UI), filters and create modal
+  // UX state: local events copy (so we can mutate in UI), filtros e modal de criação
   const [localEvents, setLocalEvents] = useState<Event[]>([...mockEvents]);
-  const [filters, setFilters] = useState<string[]>([]); // empty = all
+  const [roleFilter, setRoleFilter] = useState<PostRoleTarget>("all");
+  const [companyFilter, setCompanyFilter] = useState<CompanyTarget>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
@@ -56,9 +73,12 @@ const Agenda = () => {
   // Normaliza datas para o dia local (evita problemas de fuso)
   // Filtra eventos de acordo com filtros selecionados
   const filteredEvents = useMemo(() => {
-    if (!filters || filters.length === 0) return localEvents;
-    return localEvents.filter((ev) => filters.includes(ev.type));
-  }, [localEvents, filters]);
+    return localEvents.filter(
+      (ev) =>
+        (roleFilter === "all" || ev.roleTarget === roleFilter) &&
+        (companyFilter === "all" || ev.companyTarget === companyFilter),
+    );
+  }, [localEvents, roleFilter, companyFilter]);
 
   // Cria Dates locais a partir das strings 'YYYY-MM-DD' (evita parseISO/UTC)
   const eventDates = useMemo(() => {
@@ -77,7 +97,7 @@ const Agenda = () => {
       map[key].push(ev);
     });
     return map;
-  }, []);
+  }, [filteredEvents]);
 
   const selectedKey = selectedDate ? toKey(selectedDate) : undefined;
   const weekdayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -147,7 +167,46 @@ const Agenda = () => {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Eventos {selectedKey ? `em ${format(keyToDate(selectedKey as string), "dd/MM/yyyy")}` : "do mês"}</CardTitle>
+              <CardTitle>
+                Eventos {selectedKey ? `em ${format(keyToDate(selectedKey as string), "dd/MM/yyyy")}` : "do mês"}
+              </CardTitle>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div>
+                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Empresa
+                  </Label>
+                  <Select value={companyFilter} onValueChange={(value) => setCompanyFilter(value as CompanyTarget)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as empresas</SelectItem>
+                      {mockCompanies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Função / setor
+                  </Label>
+                  <Select value={roleFilter} onValueChange={(value) => setRoleFilter(value as PostRoleTarget)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roleFilterOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-6">
               {selectedKey ? (
