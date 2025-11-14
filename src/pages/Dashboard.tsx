@@ -9,7 +9,7 @@ import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getPostsByUserCategory } from "@/data/mockData";
+import { companies as mockCompanies, getVisiblePosts, posts as mockPosts } from "@/data/mockData";
 import {
   Dialog,
   DialogContent,
@@ -28,40 +28,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserCategory, Post } from "@/types";
-import { posts as mockPosts } from "@/data/mockData";
+import { CompanyTarget, Post, PostRoleTarget } from "@/types";
 
 const Dashboard = () => {
   const { user, isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [adminFilter, setAdminFilter] = useState<UserCategory | "todos">("todos");
+  const [adminRoleFilter, setAdminRoleFilter] = useState<PostRoleTarget>("all");
+  const [adminCompanyFilter, setAdminCompanyFilter] = useState<CompanyTarget>("all");
   
   // Estado para novo post
   const [newPost, setNewPost] = useState({
     title: "",
     content: "",
     imageUrl: "",
-    targetCategory: "todos" as UserCategory | "todos",
+    roleTarget: "all" as PostRoleTarget,
+    companyTarget: "all" as CompanyTarget,
   });
 
   // Filtra posts baseado na categoria do usuário
-  // Usuário vê apenas posts "todos" ou posts da sua categoria
-  const visiblePosts = user
-    ? getPostsByUserCategory(user.category)
-    : mockPosts;
+  const visiblePosts = getVisiblePosts(user);
 
   // Caso seja admin, permite filtrar o feed por categoria (ou ver todos)
   const postsToShow = isAdmin
-    ? adminFilter === "todos"
-      ? mockPosts
-      : mockPosts.filter((p) => p.targetCategory === adminFilter)
+    ? mockPosts.filter(
+        (post) =>
+          (adminRoleFilter === "all" || post.roleTarget === adminRoleFilter) &&
+          (adminCompanyFilter === "all" || post.companyTarget === adminCompanyFilter),
+      )
     : visiblePosts;
 
   // ============================================
   // HANDLER: Criar novo post (apenas Admin)
   // ============================================
   // ⚠️ BACKEND: POST /api/posts
-  // Body: { authorId, title, content, imageUrl, targetCategory }
+  // Body: { authorId, title, content, imageUrl, roleTarget, companyTarget }
   // Response: { post: Post }
   const handleCreatePost = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +75,8 @@ const Dashboard = () => {
       title: newPost.title,
       content: newPost.content,
       imageUrl: newPost.imageUrl || undefined,
-      targetCategory: newPost.targetCategory,
+      roleTarget: newPost.roleTarget,
+      companyTarget: newPost.companyTarget,
       likes: [],
       createdAt: new Date().toISOString(),
     };
@@ -95,7 +96,8 @@ const Dashboard = () => {
       title: "",
       content: "",
       imageUrl: "",
-      targetCategory: "todos",
+      roleTarget: "all",
+      companyTarget: "all",
     });
     setDialogOpen(false);
   };
@@ -177,23 +179,45 @@ const Dashboard = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Para quem? *</Label>
+                <Label htmlFor="roleTarget">Função / setor alvo *</Label>
                 <Select
-                  value={newPost.targetCategory}
-                  onValueChange={(value: UserCategory | "todos") =>
-                    setNewPost({ ...newPost, targetCategory: value })
+                  value={newPost.roleTarget}
+                  onValueChange={(value: PostRoleTarget) =>
+                    setNewPost({ ...newPost, roleTarget: value })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
-                    <SelectItem value="todos">Todos os colaboradores</SelectItem>
+                    <SelectItem value="all">Todos os setores</SelectItem>
                     <SelectItem value="vendedor">Vendedores</SelectItem>
                     <SelectItem value="tecnico">Técnicos</SelectItem>
                     <SelectItem value="rh">RH</SelectItem>
                     <SelectItem value="administrativo">Administrativo</SelectItem>
                     <SelectItem value="outros">Outros</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="companyTarget">Empresa alvo *</Label>
+                <Select
+                  value={newPost.companyTarget}
+                  onValueChange={(value: CompanyTarget) =>
+                    setNewPost({ ...newPost, companyTarget: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover">
+                    <SelectItem value="all">Todas as empresas</SelectItem>
+                    {mockCompanies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -209,22 +233,41 @@ const Dashboard = () => {
       {/* Filtro (apenas Admin) */}
       {isAdmin && (
         <div className="mb-6">
-          <Label htmlFor="filter">Filtrar posts por categoria</Label>
-          <div className="mt-2">
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="filter">Filtrar posts</Label>
+            <p className="text-xs text-muted-foreground">Role + Empresa</p>
+          </div>
+          <div className="mt-2 grid gap-3 md:grid-cols-2">
             <Select
-              value={adminFilter}
-              onValueChange={(value: UserCategory | "todos") => setAdminFilter(value)}
+              value={adminRoleFilter}
+              onValueChange={(value: PostRoleTarget) => setAdminRoleFilter(value)}
             >
               <SelectTrigger id="filter">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover">
-                <SelectItem value="todos">Todos os posts</SelectItem>
+                <SelectItem value="all">Todos os setores</SelectItem>
                 <SelectItem value="vendedor">Vendedores</SelectItem>
                 <SelectItem value="tecnico">Técnicos</SelectItem>
                 <SelectItem value="rh">RH</SelectItem>
                 <SelectItem value="administrativo">Administrativo</SelectItem>
                 <SelectItem value="outros">Outros</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={adminCompanyFilter}
+              onValueChange={(value: CompanyTarget) => setAdminCompanyFilter(value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover">
+                <SelectItem value="all">Todas as empresas</SelectItem>
+                {mockCompanies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.nome}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

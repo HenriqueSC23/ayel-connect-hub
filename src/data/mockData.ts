@@ -144,10 +144,11 @@ export const posts: Post[] = [
     id: "1",
     authorId: "1",
     authorName: "Administrador Sistema",
-    title: "Bem-vindos à Nova Intranet!",
-    content: "Estamos felizes em apresentar nossa nova intranet da Ayel! Aqui você encontrará todas as informações importantes da empresa em um só lugar.",
+    title: "Bem-vindos a Nova Intranet!",
+    content: "Estamos felizes em apresentar nossa nova intranet da Ayel! Aqui voce encontrara todas as informacoes importantes da empresa em um so lugar.",
     imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
-    targetCategory: "todos",
+    roleTarget: "all",
+    companyTarget: "all",
     likes: ["2", "3", "4"],
     companyId: "c1",
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -156,10 +157,11 @@ export const posts: Post[] = [
     id: "2",
     authorId: "1",
     authorName: "Administrador Sistema",
-    title: "Novos Equipamentos para Técnicos",
-    content: "Informamos que chegaram os novos tablets para a equipe técnica. Passar no RH para retirada.",
+    title: "Novos Equipamentos para Tecnicos",
+    content: "Informamos que chegaram os novos tablets para a equipe tecnica. Passar no RH para retirada.",
     imageUrl: "https://images.unsplash.com/photo-1484788984921-03950022c9ef?w=800&q=80",
-    targetCategory: "tecnico",
+    roleTarget: "tecnico",
+    companyTarget: "c1",
     likes: ["3"],
     companyId: "c1",
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -168,13 +170,26 @@ export const posts: Post[] = [
     id: "3",
     authorId: "1",
     authorName: "Administrador Sistema",
-    content: "🎯 Meta do mês batida! Parabéns à equipe de vendas pelo excelente desempenho. Continuem assim!",
-    targetCategory: "vendedor",
+    content: "A meta do mes batida! Parabens a equipe de vendas pelo excelente desempenho. Continuem assim!",
+    roleTarget: "vendedor",
+    companyTarget: "c2",
     likes: ["2", "5"],
     companyId: "c2",
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
 ];
+
+export const getVisiblePosts = (user: User | null): Post[] => {
+  if (!user) return posts;
+  if (user.role === "admin" || user.role === "superadmin") return posts;
+  return posts.filter(
+    (post) =>
+      (post.roleTarget === "all" || post.roleTarget === user.category) &&
+      (post.companyTarget === "all" || post.companyTarget === user.companyId),
+  );
+};
+
+
 
 // ============================================
 // COMENTÁRIOS
@@ -589,16 +604,6 @@ export const createUser = async (userData: Omit<User, "id" | "createdAt">): Prom
   };
   users.push(newUser);
   return newUser;
-};
-
-/**
- * Filtra posts por categoria de usuário
- * API: GET /api/posts?userCategory={category}
- */
-export const getPostsByUserCategory = (category: UserCategory): Post[] => {
-  return posts.filter(
-    post => post.targetCategory === "todos" || post.targetCategory === category
-  );
 };
 
 /**

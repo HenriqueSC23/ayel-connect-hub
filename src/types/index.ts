@@ -45,6 +45,9 @@ export interface User {
 // ============================================
 // Representa uma publicação no mural (feed)
 // BANCO DE DADOS: Tabela "posts"
+export type PostRoleTarget = UserCategory | "all";
+export type CompanyTarget = "all" | string;
+
 export interface Post {
   id: string;                    // UUID ou auto-increment
   authorId: string;              // Foreign key para users.id
@@ -52,7 +55,8 @@ export interface Post {
   title?: string;                // Título opcional
   content: string;               // Texto do post
   imageUrl?: string;             // URL da imagem (storage/S3)
-  targetCategory: UserCategory | "todos";  // Para quem o post é visível
+  roleTarget: PostRoleTarget;    // Função alvo do post
+  companyTarget: CompanyTarget;  // Empresa alvo do post
   likes: string[];               // Array de user IDs que curtiram
   createdAt: string;             // Data de criação
   companyId?: string;            // Empresa proprietária do post

@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Send } from "lucide-react";
-import { Post, Comment } from "@/types";
+import { Comment, CompanyTarget, Post, PostRoleTarget } from "@/types";
+import { companies as mockCompanies } from "@/data/mockData";
 import { useAuth } from "@/contexts/AuthContext";
 import { comments as mockComments } from "@/data/mockData";
 import { formatDistanceToNow } from "date-fns";
@@ -91,17 +92,21 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
     });
   };
 
-  // Mapeia categoria para label
-  const getCategoryLabel = (category: string) => {
-    const labels: Record<string, string> = {
-      todos: "Todos",
+  const getRoleLabel = (role: PostRoleTarget) => {
+    const labels: Record<PostRoleTarget, string> = {
+      all: "Todos os setores",
       vendedor: "Vendedores",
       tecnico: "Técnicos",
       rh: "RH",
       administrativo: "Administrativo",
       outros: "Outros",
     };
-    return labels[category] || category;
+    return labels[role] || role;
+  };
+
+  const getCompanyLabel = (target: CompanyTarget) => {
+    if (target === "all") return "Todas as empresas";
+    return mockCompanies.find((company) => company.id === target)?.nome || "Empresa";
   };
 
   return (
@@ -124,7 +129,14 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
               <p className="text-xs text-muted-foreground">{formatDate(post.createdAt)}</p>
             </div>
           </div>
-          <Badge variant="secondary">{getCategoryLabel(post.targetCategory)}</Badge>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="secondary" className="text-xs">
+            {getRoleLabel(post.roleTarget)}
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            {getCompanyLabel(post.companyTarget)}
+          </Badge>
         </div>
 
         {post.title && <h3 className="font-semibold text-lg">{post.title}</h3>}
