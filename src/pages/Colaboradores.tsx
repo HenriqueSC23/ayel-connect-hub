@@ -4,18 +4,44 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { collaborators } from "@/data/mockData";
+import { users as mockUsers, companies as mockCompanies } from "@/data/mockData";
 import { Search, Mail } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Company, User } from "@/types";
 
 const Colaboradores = () => {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
 
-  const filtered = collaborators.filter((c) =>
-    c.fullName.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase()) ||
-    c.setor?.toLowerCase().includes(search.toLowerCase())
-  );
+  const companyMap = useMemo(() => {
+    const map = new Map<string, Company>();
+    mockCompanies.forEach((company) => map.set(company.id, company));
+    return map;
+  }, []);
+
+  const normalizedUsers: User[] = useMemo(() => {
+    const canViewAllCompanies = user?.role === "superadmin";
+    return mockUsers.filter((u) => {
+      if (u.role !== "user") return false;
+      if (canViewAllCompanies) return true;
+      if (user?.companyId) {
+        return u.companyId === user.companyId;
+      }
+      return true;
+    });
+  }, [user?.role, user?.companyId]);
+
+  const filtered = normalizedUsers.filter((collaborator) => {
+    const query = search.toLowerCase();
+    const companyName = collaborator.companyId ? companyMap.get(collaborator.companyId)?.nome || "" : "";
+    return (
+      collaborator.fullName.toLowerCase().includes(query) ||
+      collaborator.email.toLowerCase().includes(query) ||
+      collaborator.category.toLowerCase().includes(query) ||
+      companyName.toLowerCase().includes(query)
+    );
+  });
 
   const categoryLabels: Record<string, string> = {
     vendedor: "Vendedor",
@@ -59,8 +85,10 @@ const Colaboradores = () => {
                     {person.email}
                   </p>
                   <div className="flex gap-2 mt-2">
-                    <Badge variant="secondary">{categoryLabels[person.category]}</Badge>
-                    {person.setor && <Badge variant="outline">{person.setor}</Badge>}
+                    <Badge variant="secondary">{categoryLabels[person.category] || person.category}</Badge>
+                    <Badge variant="outline">
+                      {person.companyId ? companyMap.get(person.companyId)?.nome || "Empresa" : "Sem empresa"}
+                    </Badge>
                   </div>
                 </div>
               </div>

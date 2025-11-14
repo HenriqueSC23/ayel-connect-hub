@@ -57,6 +57,7 @@ export interface Post {
   imageUrl?: string;             // URL da imagem (storage/S3)
   roleTarget: PostRoleTarget;    // Função alvo do post
   companyTarget: CompanyTarget;  // Empresa alvo do post
+  isImportant?: boolean;         // Indica se � comunicado importante
   likes: string[];               // Array de user IDs que curtiram
   createdAt: string;             // Data de criação
   companyId?: string;            // Empresa proprietária do post
@@ -221,3 +222,4 @@ export interface SearchFilters {
   month?: number;                // Filtrar por mês (1-12)
   type?: string;                 // Filtrar por tipo (eventos)
 }
+

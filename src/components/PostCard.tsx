@@ -110,7 +110,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
   };
 
   return (
-    <Card className="w-full">
+    <Card className={`w-full ${post.isImportant ? "border-amber-400/70 shadow-lg shadow-amber-200/40" : ""}`}>
       <CardHeader className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -130,6 +130,11 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
             </div>
           </div>
         </div>
+        {post.isImportant && (
+          <Badge className="bg-amber-500/90 text-xs font-semibold uppercase tracking-wide text-white">
+            Comunicado importante
+          </Badge>
+        )}
         <div className="flex flex-wrap gap-2">
           <Badge variant="secondary" className="text-xs">
             {getRoleLabel(post.roleTarget)}
