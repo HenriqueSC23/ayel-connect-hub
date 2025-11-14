@@ -128,7 +128,7 @@ const Agenda = () => {
                   }}
                   components={{
                     Day: (dayProps: DayProps) => {
-                      const { date, className: dayClassName, ...buttonProps } = dayProps;
+                      const { date, ...buttonProps } = dayProps;
                       const key = toKey(date);
                       const evs: Event[] = eventsByDate[key] ?? [];
                       const title = evs.length === 0 ? "" : evs.map((event) => event.title).join("\n");
@@ -138,7 +138,7 @@ const Agenda = () => {
                             <button
                               {...buttonProps}
                               type="button"
-                              className={`w-full h-full flex flex-col items-center justify-center ${dayClassName || ""}`}
+                              className="w-full h-full flex flex-col items-center justify-center"
                             >
                               <div className="flex flex-col items-center gap-1">
                                 <div className="text-[0.72rem]">{date.getDate()}</div>
