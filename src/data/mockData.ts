@@ -22,14 +22,17 @@
 // }
 // ============================================
 
-import { 
-  User, 
-  Post, 
-  Comment, 
-  Event, 
-  Collaborator, 
+import {
+  User,
+  Post,
+  Comment,
+  Event,
+  Collaborator,
   Shortcut,
-  UserCategory 
+  UserCategory,
+  BlogPost,
+  Ramal,
+  Training,
 } from "@/types";
 import { Company } from "@/types";
 
@@ -57,7 +60,7 @@ export const users: User[] = [
     email: "joao.silva@ayel.com.br",
     password: "123456",
     fullName: "João Silva",
-    role: "admin",
+    role: "user",
     category: "vendedor",
     setor: "Vendas",
     birthDate: "1992-03-20",
@@ -359,6 +362,97 @@ export const shortcuts: Shortcut[] = [
 ];
 
 // ============================================
+// RAMAIS
+// ============================================
+export const ramais: Ramal[] = [
+  {
+    id: "r1",
+    name: "Central Administrativa",
+    sector: "Administrativo",
+    extension: "100",
+    phone: "(11) 4002-8922",
+    email: "adm@ayel.com.br",
+    companyId: "c1",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "r2",
+    name: "João Silva",
+    sector: "Vendas",
+    extension: "210",
+    phone: "(11) 98888-1234",
+    email: "joao.silva@ayel.com.br",
+    companyId: "c1",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "r3",
+    name: "Suporte Técnico",
+    sector: "Técnico",
+    extension: "350",
+    phone: "(11) 97777-4321",
+    email: "suporte@ayel.com.br",
+    companyId: "c1",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "r4",
+    name: "Recursos Humanos",
+    sector: "RH",
+    extension: "150",
+    phone: "(31) 3222-0000",
+    email: "rh@ayeltech.com",
+    companyId: "c2",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "r5",
+    name: "Comercial",
+    sector: "Vendas",
+    extension: "250",
+    phone: "(31) 93333-2222",
+    companyId: "c2",
+    createdAt: new Date().toISOString(),
+  },
+];
+
+// ============================================
+// TREINAMENTOS
+// ============================================
+export const trainings: Training[] = [
+  {
+    id: "t1",
+    title: "Boas práticas de vendas consultivas",
+    shortDescription: "Técnicas e scripts para conduzir negociações de alto valor.",
+    imageUrl: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=60",
+    category: "vendedor",
+    content: "Neste treinamento você aprenderá a mapear dores do cliente, montar propostas focadas em valor e utilizar gatilhos de urgência sem perder a empatia.",
+    companyId: "c1",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "t2",
+    title: "Checklist técnico de instalações",
+    shortDescription: "Fluxos para instalação segura dos equipamentos Ayel.",
+    imageUrl: "https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?auto=format&fit=crop&w=1200&q=60",
+    category: "tecnico",
+    content: "Revise cada etapa de instalação, desde a chegada no cliente até os testes finais dos sensores e centrais de alarme. Inclui checklists imprimíveis.",
+    companyId: "c1",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "t3",
+    title: "Atendimento N1 para suporte",
+    shortDescription: "Orientações para diagnosticar e resolver chamados recorrentes.",
+    imageUrl: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=60",
+    category: "suporte",
+    content: "Procedimentos de troubleshooting, scripts de comunicação e fluxos de escalonamento para equipes de suporte da Ayel Tecnologia.",
+    companyId: "c2",
+    createdAt: new Date().toISOString(),
+  },
+];
+
+// ============================================
 // HELPERS: Companies CRUD (in-memory/mock)
 // ============================================
 export const createCompany = async (companyData: Omit<Company, "id" | "createdAt">): Promise<Company> => {
@@ -385,6 +479,66 @@ export const deleteCompany = async (id: string): Promise<boolean> => {
   const idx = companies.findIndex(c => c.id === id);
   if (idx === -1) return false;
   companies.splice(idx, 1);
+  return true;
+};
+
+// ============================================
+// HELPERS: Ramais CRUD (in-memory/mock)
+// ============================================
+export const createRamal = async (ramalData: Omit<Ramal, "id" | "createdAt" | "updatedAt">): Promise<Ramal> => {
+  await simulateNetworkDelay();
+  const newRamal: Ramal = {
+    ...ramalData,
+    id: `r${ramais.length + 1}`,
+    createdAt: new Date().toISOString(),
+  };
+  ramais.push(newRamal);
+  return newRamal;
+};
+
+export const updateRamal = async (id: string, data: Partial<Ramal>): Promise<Ramal | null> => {
+  await simulateNetworkDelay();
+  const idx = ramais.findIndex((r) => r.id === id);
+  if (idx === -1) return null;
+  ramais[idx] = { ...ramais[idx], ...data, updatedAt: new Date().toISOString() };
+  return ramais[idx];
+};
+
+export const deleteRamal = async (id: string): Promise<boolean> => {
+  await simulateNetworkDelay();
+  const idx = ramais.findIndex((r) => r.id === id);
+  if (idx === -1) return false;
+  ramais.splice(idx, 1);
+  return true;
+};
+
+// ============================================
+// HELPERS: Treinamentos CRUD (in-memory/mock)
+// ============================================
+export const createTraining = async (trainingData: Omit<Training, "id" | "createdAt" | "updatedAt">): Promise<Training> => {
+  await simulateNetworkDelay();
+  const newTraining: Training = {
+    ...trainingData,
+    id: `t${trainings.length + 1}`,
+    createdAt: new Date().toISOString(),
+  };
+  trainings.push(newTraining);
+  return newTraining;
+};
+
+export const updateTraining = async (id: string, data: Partial<Training>): Promise<Training | null> => {
+  await simulateNetworkDelay();
+  const idx = trainings.findIndex((t) => t.id === id);
+  if (idx === -1) return null;
+  trainings[idx] = { ...trainings[idx], ...data, updatedAt: new Date().toISOString() };
+  return trainings[idx];
+};
+
+export const deleteTraining = async (id: string): Promise<boolean> => {
+  await simulateNetworkDelay();
+  const idx = trainings.findIndex((t) => t.id === id);
+  if (idx === -1) return false;
+  trainings.splice(idx, 1);
   return true;
 };
 

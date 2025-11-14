@@ -7,12 +7,15 @@
 // com o schema do banco.
 
 // Categorias de colaboradores disponíveis no sistema
-export type UserCategory = 
-  | "vendedor" 
-  | "tecnico" 
-  | "rh" 
-  | "administrativo" 
+export type UserCategory =
+  | "vendedor"
+  | "tecnico"
+  | "rh"
+  | "administrativo"
   | "outros";
+
+export type BlogCategory = "geral" | "vendedor" | "rh";
+export type TrainingCategory = "vendedor" | "tecnico" | "suporte" | "geral";
 
 // Tipo de usuário (define permissões)
 export type UserRole = "superadmin" | "admin" | "user";
@@ -53,6 +56,37 @@ export interface Post {
   likes: string[];               // Array de user IDs que curtiram
   createdAt: string;             // Data de criação
   companyId?: string;            // Empresa proprietária do post
+}
+
+// ============================================
+// BLOG POST
+// ============================================
+export interface BlogPost {
+  id: string;
+  title: string;
+  subtitle?: string;
+  content: string;
+  coverImage?: string;
+  companyId: string;
+  category: BlogCategory;
+  createdAt: string; // YYYY-MM-DD
+  updatedAt?: string;
+  authorId: string;
+}
+
+// ============================================
+// TREINAMENTO
+// ============================================
+export interface Training {
+  id: string;
+  title: string;
+  shortDescription: string;
+  imageUrl: string;
+  category: TrainingCategory;
+  content: string;
+  companyId: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 // ============================================
@@ -129,6 +163,21 @@ export interface Company {
   logo?: string;
   brandColor?: string;
   createdAt: string;
+}
+
+// ============================================
+// RAMAL
+// ============================================
+export interface Ramal {
+  id: string;
+  name: string;
+  sector: string;
+  extension: string;
+  phone?: string;
+  email?: string;
+  companyId: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 // ============================================

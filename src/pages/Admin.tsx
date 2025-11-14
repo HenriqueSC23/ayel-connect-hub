@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,16 +13,40 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { users as mockUsers, createUser, events as mockEvents, collaborators as mockCollaborators, companies as mockCompanies, createCompany, updateCompany, deleteCompany } from "@/data/mockData";
-import { Company } from "@/types";
+import {
+  users as mockUsers,
+  createUser,
+  events as mockEvents,
+  collaborators as mockCollaborators,
+  companies as mockCompanies,
+  createCompany,
+  updateCompany,
+  deleteCompany,
+  ramais as mockRamais,
+  createRamal,
+  updateRamal,
+  deleteRamal,
+  trainings as mockTrainings,
+  createTraining,
+  updateTraining,
+  deleteTraining,
+} from "@/data/mockData";
+import { Company, Ramal, Training } from "@/types";
 import { User, Event, Collaborator } from "@/types";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Admin = () => {
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === "superadmin";
+  const defaultCompanyId = user?.companyId || mockCompanies[0]?.id || "";
   const [users, setUsers] = useState<User[]>([...mockUsers]);
   const [events, setEvents] = useState<Event[]>([...mockEvents]);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([...mockCollaborators]);
   const [companies, setCompanies] = useState<Company[]>([...mockCompanies]);
+  const [ramais, setRamais] = useState<Ramal[]>([...mockRamais]);
+  const [trainings, setTrainings] = useState<Training[]>([...mockTrainings]);
 
   const [newCollaborator, setNewCollaborator] = useState({
     fullName: "",
@@ -107,6 +131,32 @@ const Admin = () => {
   const [collabsModalOpen, setCollabsModalOpen] = useState(false);
   const [editingCollab, setEditingCollab] = useState<Collaborator | null>(null);
   const [editCollabModalOpen, setEditCollabModalOpen] = useState(false);
+
+  // Ramais modals/forms
+  const [ramalListModalOpen, setRamalListModalOpen] = useState(false);
+  const [ramalCreateModalOpen, setRamalCreateModalOpen] = useState(false);
+  const [ramalEditModalOpen, setRamalEditModalOpen] = useState(false);
+  const [editingRamal, setEditingRamal] = useState<Ramal | null>(null);
+  const [newRamal, setNewRamal] = useState({
+    name: "",
+    sector: "",
+    extension: "",
+    phone: "",
+    email: "",
+    companyId: defaultCompanyId,
+  });
+  const [trainingListModalOpen, setTrainingListModalOpen] = useState(false);
+  const [trainingCreateModalOpen, setTrainingCreateModalOpen] = useState(false);
+  const [trainingEditModalOpen, setTrainingEditModalOpen] = useState(false);
+  const [editingTraining, setEditingTraining] = useState<Training | null>(null);
+  const [newTraining, setNewTraining] = useState({
+    title: "",
+    shortDescription: "",
+    imageUrl: "",
+    category: "geral" as const,
+    content: "",
+    companyId: defaultCompanyId,
+  });
 
   const handleAddCompany = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,13 +249,103 @@ const Admin = () => {
     setEditingEvent(null);
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container max-w-5xl py-6 px-4">
-        <h1 className="text-3xl font-bold mb-6">Administração</h1>
+  const resetNewRamal = () => {
+    setNewRamal({
+      name: "",
+      sector: "",
+      extension: "",
+      phone: "",
+      email: "",
+      companyId: isSuperAdmin ? companies[0]?.id || defaultCompanyId : user?.companyId || defaultCompanyId,
+    });
+  };
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+  const handleAddRamal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const companyId = isSuperAdmin ? newRamal.companyId : user?.companyId || defaultCompanyId;
+    if (!newRamal.name || !newRamal.sector || !newRamal.extension || !companyId) return;
+    await createRamal({
+      name: newRamal.name,
+      sector: newRamal.sector,
+      extension: newRamal.extension,
+      phone: newRamal.phone || undefined,
+      email: newRamal.email || undefined,
+      companyId,
+    });
+    setRamais([...mockRamais]);
+    setRamalCreateModalOpen(false);
+    resetNewRamal();
+  };
+
+  const handleDeleteRamal = async (id: string) => {
+    await deleteRamal(id);
+    setRamais([...mockRamais]);
+  };
+
+  const handleEditRamalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingRamal) return;
+    const companyId = isSuperAdmin ? editingRamal.companyId : user?.companyId || editingRamal.companyId;
+    if (!editingRamal.name || !editingRamal.sector || !editingRamal.extension || !companyId) return;
+    await updateRamal(editingRamal.id, { ...editingRamal, companyId });
+    setRamais([...mockRamais]);
+    setRamalEditModalOpen(false);
+    setEditingRamal(null);
+  };
+
+  const resetNewTraining = () => {
+    setNewTraining({
+      title: "",
+      shortDescription: "",
+      imageUrl: "",
+      category: "geral",
+      content: "",
+      companyId: isSuperAdmin ? companies[0]?.id || defaultCompanyId : user?.companyId || defaultCompanyId,
+    });
+  };
+
+  const handleAddTraining = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const companyId = isSuperAdmin ? newTraining.companyId : user?.companyId || defaultCompanyId;
+    if (!newTraining.title || !newTraining.shortDescription || !newTraining.imageUrl || !newTraining.content || !companyId) return;
+    await createTraining({
+      title: newTraining.title,
+      shortDescription: newTraining.shortDescription,
+      imageUrl: newTraining.imageUrl,
+      category: newTraining.category,
+      content: newTraining.content,
+      companyId,
+    });
+    setTrainings([...mockTrainings]);
+    setTrainingCreateModalOpen(false);
+    resetNewTraining();
+  };
+
+  const handleDeleteTraining = async (id: string) => {
+    await deleteTraining(id);
+    setTrainings([...mockTrainings]);
+  };
+
+  const handleEditTrainingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTraining) return;
+    const companyId = isSuperAdmin ? editingTraining.companyId : user?.companyId || editingTraining.companyId;
+    if (!editingTraining.title || !editingTraining.shortDescription || !editingTraining.imageUrl || !editingTraining.content || !companyId) return;
+    await updateTraining(editingTraining.id, { ...editingTraining, companyId });
+    setTrainings([...mockTrainings]);
+    setTrainingEditModalOpen(false);
+    setEditingTraining(null);
+  };
+
+  const getCompanyName = (id: string) => companies.find((c) => c.id === id)?.nome || "Empresa";
+  const accessibleRamais = isSuperAdmin ? ramais : ramais.filter((ramal) => !user?.companyId || ramal.companyId === user?.companyId);
+  const accessibleTrainings = isSuperAdmin ? trainings : trainings.filter((training) => !user?.companyId || training.companyId === user?.companyId);
+
+  return (
+    <AppLayout>
+      <h1 className="text-3xl font-bold mb-6">Administração</h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           <Card className="flex flex-col h-full min-h-[260px]">
             <CardHeader className="pb-4">
               <CardTitle>Gerenciar Usuários</CardTitle>
@@ -639,9 +779,446 @@ const Admin = () => {
               <span className="text-sm text-muted-foreground">Total: {companies.length} empresa(s)</span>
             </CardFooter>
           </Card>
-        </div>
-      </main>
-    </div>
+
+          <Card className="flex flex-col h-full min-h-[260px]">
+            <CardHeader className="pb-4">
+              <CardTitle>Gerenciar Ramais</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col gap-4">
+              <div className="flex flex-row flex-wrap items-start gap-3 w-full min-w-0">
+                <Dialog
+                  open={ramalCreateModalOpen}
+                  onOpenChange={(open) => {
+                    setRamalCreateModalOpen(open);
+                    if (!open) resetNewRamal();
+                  }}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="w-full sm:w-auto">Adicionar Ramal</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px] w-full">
+                    <DialogHeader>
+                      <DialogTitle>Novo Ramal</DialogTitle>
+                      <DialogDescription>Cadastre um novo ramal interno</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleAddRamal} className="space-y-3">
+                      <div>
+                        <Label>Nome</Label>
+                        <Input value={newRamal.name} onChange={(e) => setNewRamal({ ...newRamal, name: e.target.value })} required />
+                      </div>
+                      <div>
+                        <Label>Setor/Categoria</Label>
+                        <Input value={newRamal.sector} onChange={(e) => setNewRamal({ ...newRamal, sector: e.target.value })} required />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <Label>Número do Ramal</Label>
+                          <Input value={newRamal.extension} onChange={(e) => setNewRamal({ ...newRamal, extension: e.target.value })} required />
+                        </div>
+                        <div>
+                          <Label>Telefone</Label>
+                          <Input value={newRamal.phone} onChange={(e) => setNewRamal({ ...newRamal, phone: e.target.value })} />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Email</Label>
+                        <Input type="email" value={newRamal.email} onChange={(e) => setNewRamal({ ...newRamal, email: e.target.value })} />
+                      </div>
+                      {isSuperAdmin ? (
+                        <div>
+                          <Label>Empresa</Label>
+                          <Select value={newRamal.companyId} onValueChange={(value) => setNewRamal({ ...newRamal, companyId: value })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a empresa" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {mockCompanies.map((company) => (
+                                <SelectItem key={company.id} value={company.id}>
+                                  {company.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ) : (
+                        <div>
+                          <Label>Empresa</Label>
+                          <Input value={getCompanyName(user?.companyId || newRamal.companyId)} disabled />
+                        </div>
+                      )}
+                      <div className="flex justify-end">
+                        <Button type="submit">Salvar Ramal</Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={ramalListModalOpen} onOpenChange={setRamalListModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full sm:w-auto">
+                      Editar Ramais
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[850px] w-full">
+                    <DialogHeader>
+                      <DialogTitle>Ramais cadastrados</DialogTitle>
+                      <DialogDescription>Atualize ou exclua os ramais disponíveis</DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4 space-y-3 max-h-[60vh] overflow-auto">
+                      {accessibleRamais.length === 0 ? (
+                        <div className="text-sm text-muted-foreground">Nenhum ramal disponível.</div>
+                      ) : (
+                        accessibleRamais.map((ramal) => (
+                          <div key={ramal.id} className="border rounded-lg p-3 flex flex-col gap-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <div>
+                                <div className="font-semibold">{ramal.name}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Setor: {ramal.sector} • Ramal {ramal.extension}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {ramal.phone && <>Tel: {ramal.phone} • </>}
+                                  {ramal.email}
+                                </div>
+                                {isSuperAdmin && (
+                                  <div className="text-xs text-muted-foreground">Empresa: {getCompanyName(ramal.companyId)}</div>
+                                )}
+                              </div>
+                              <div className="flex gap-2 flex-wrap">
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingRamal({ ...ramal });
+                                    setRamalEditModalOpen(true);
+                                  }}
+                                >
+                                  Editar
+                                </Button>
+                                <Button variant="destructive" size="sm" onClick={() => handleDeleteRamal(ramal.id)}>
+                                  Excluir
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <Dialog open={ramalEditModalOpen} onOpenChange={(open) => { setRamalEditModalOpen(open); if (!open) setEditingRamal(null); }}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Editar Ramal</DialogTitle>
+                    <DialogDescription>Atualize os dados do ramal selecionado</DialogDescription>
+                  </DialogHeader>
+                  {editingRamal ? (
+                    <form onSubmit={handleEditRamalSubmit} className="space-y-3">
+                      <div>
+                        <Label>Nome</Label>
+                        <Input value={editingRamal.name} onChange={(e) => setEditingRamal({ ...editingRamal, name: e.target.value })} required />
+                      </div>
+                      <div>
+                        <Label>Setor</Label>
+                        <Input value={editingRamal.sector} onChange={(e) => setEditingRamal({ ...editingRamal, sector: e.target.value })} required />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <Label>Ramal</Label>
+                          <Input value={editingRamal.extension} onChange={(e) => setEditingRamal({ ...editingRamal, extension: e.target.value })} required />
+                        </div>
+                        <div>
+                          <Label>Telefone</Label>
+                          <Input value={editingRamal.phone || ""} onChange={(e) => setEditingRamal({ ...editingRamal, phone: e.target.value })} />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Email</Label>
+                        <Input type="email" value={editingRamal.email || ""} onChange={(e) => setEditingRamal({ ...editingRamal, email: e.target.value })} />
+                      </div>
+                      {isSuperAdmin ? (
+                        <div>
+                          <Label>Empresa</Label>
+                          <Select value={editingRamal.companyId} onValueChange={(value) => setEditingRamal({ ...editingRamal, companyId: value })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a empresa" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {mockCompanies.map((company) => (
+                                <SelectItem key={company.id} value={company.id}>
+                                  {company.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ) : (
+                        <div>
+                          <Label>Empresa</Label>
+                          <Input value={getCompanyName(editingRamal.companyId)} disabled />
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <Button
+                          variant="destructive"
+                          type="button"
+                          onClick={() => {
+                            if (editingRamal) {
+                              handleDeleteRamal(editingRamal.id);
+                              setRamalEditModalOpen(false);
+                              setEditingRamal(null);
+                            }
+                          }}
+                        >
+                          Excluir
+                        </Button>
+                        <div className="flex gap-2">
+                          <Button type="button" variant="ghost" onClick={() => { setRamalEditModalOpen(false); setEditingRamal(null); }}>
+                            Cancelar
+                          </Button>
+                          <Button type="submit">Salvar</Button>
+                        </div>
+                      </div>
+                    </form>
+                  ) : (
+                    <div>Nenhum ramal selecionado.</div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+            <CardFooter className="justify-end border-t border-border/60 pt-4">
+              <span className="text-sm text-muted-foreground">Total: {accessibleRamais.length} ramal(is)</span>
+            </CardFooter>
+          </Card>
+
+          <Card className="flex flex-col h-full min-h-[260px]">
+            <CardHeader className="pb-4">
+              <CardTitle>Gerenciar Treinamentos</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col gap-4">
+              <div className="flex flex-row flex-wrap items-start gap-3 w-full min-w-0">
+                <Dialog
+                  open={trainingCreateModalOpen}
+                  onOpenChange={(open) => {
+                    setTrainingCreateModalOpen(open);
+                    if (!open) resetNewTraining();
+                  }}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="w-full sm:w-auto">Adicionar Treinamento</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[650px] w-full">
+                    <DialogHeader>
+                      <DialogTitle>Novo Treinamento</DialogTitle>
+                      <DialogDescription>Cadastre conteúdos para os colaboradores</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleAddTraining} className="space-y-3">
+                      <div>
+                        <Label>Título</Label>
+                        <Input value={newTraining.title} onChange={(e) => setNewTraining({ ...newTraining, title: e.target.value })} required />
+                      </div>
+                      <div>
+                        <Label>Descrição curta</Label>
+                        <Input value={newTraining.shortDescription} onChange={(e) => setNewTraining({ ...newTraining, shortDescription: e.target.value })} required />
+                      </div>
+                      <div>
+                        <Label>URL da imagem</Label>
+                        <Input value={newTraining.imageUrl} onChange={(e) => setNewTraining({ ...newTraining, imageUrl: e.target.value })} required />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <Label>Categoria</Label>
+                          <Select value={newTraining.category} onValueChange={(value) => setNewTraining({ ...newTraining, category: value as any })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a categoria" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="geral">Geral</SelectItem>
+                              <SelectItem value="vendedor">Vendedor</SelectItem>
+                              <SelectItem value="tecnico">Técnico</SelectItem>
+                              <SelectItem value="suporte">Suporte</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {isSuperAdmin ? (
+                          <div>
+                            <Label>Empresa</Label>
+                            <Select value={newTraining.companyId} onValueChange={(value) => setNewTraining({ ...newTraining, companyId: value })}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione a empresa" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {companies.map((company) => (
+                                  <SelectItem key={company.id} value={company.id}>
+                                    {company.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ) : (
+                          <div>
+                            <Label>Empresa</Label>
+                            <Input value={getCompanyName(user?.companyId || newTraining.companyId)} disabled />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label>Conteúdo completo</Label>
+                        <Textarea rows={6} value={newTraining.content} onChange={(e) => setNewTraining({ ...newTraining, content: e.target.value })} required />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button type="submit">Salvar Treinamento</Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={trainingListModalOpen} onOpenChange={setTrainingListModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full sm:w-auto">
+                      Editar Treinamentos
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[850px] w-full">
+                    <DialogHeader>
+                      <DialogTitle>Treinamentos cadastrados</DialogTitle>
+                      <DialogDescription>Gerencie os conteúdos publicados</DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4 space-y-3 max-h-[60vh] overflow-auto">
+                      {accessibleTrainings.length === 0 ? (
+                        <div className="text-sm text-muted-foreground">Nenhum treinamento disponível.</div>
+                      ) : (
+                        accessibleTrainings.map((training) => (
+                          <div key={training.id} className="flex flex-col gap-2 border rounded-lg p-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <div className="font-semibold">{training.title}</div>
+                              <div className="text-xs text-muted-foreground">
+                                Categoria: {training.category} • {format(new Date(training.createdAt), "dd/MM/yyyy")}
+                              </div>
+                              {isSuperAdmin && (
+                                <div className="text-xs text-muted-foreground">Empresa: {getCompanyName(training.companyId)}</div>
+                              )}
+                            </div>
+                            <div className="flex gap-2 flex-wrap">
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setEditingTraining({ ...training });
+                                  setTrainingEditModalOpen(true);
+                                }}
+                              >
+                                Editar
+                              </Button>
+                              <Button variant="destructive" size="sm" onClick={() => handleDeleteTraining(training.id)}>
+                                Excluir
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <Dialog open={trainingEditModalOpen} onOpenChange={(open) => { setTrainingEditModalOpen(open); if (!open) setEditingTraining(null); }}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Editar Treinamento</DialogTitle>
+                    <DialogDescription>Atualize os dados do treinamento</DialogDescription>
+                  </DialogHeader>
+                  {editingTraining ? (
+                    <form onSubmit={handleEditTrainingSubmit} className="space-y-3">
+                      <div>
+                        <Label>Título</Label>
+                        <Input value={editingTraining.title} onChange={(e) => setEditingTraining({ ...editingTraining, title: e.target.value })} required />
+                      </div>
+                      <div>
+                        <Label>Descrição curta</Label>
+                        <Input value={editingTraining.shortDescription} onChange={(e) => setEditingTraining({ ...editingTraining, shortDescription: e.target.value })} required />
+                      </div>
+                      <div>
+                        <Label>URL da imagem</Label>
+                        <Input value={editingTraining.imageUrl} onChange={(e) => setEditingTraining({ ...editingTraining, imageUrl: e.target.value })} required />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <Label>Categoria</Label>
+                          <Select value={editingTraining.category} onValueChange={(value) => setEditingTraining({ ...editingTraining, category: value as any })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a categoria" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="geral">Geral</SelectItem>
+                              <SelectItem value="vendedor">Vendedor</SelectItem>
+                              <SelectItem value="tecnico">Técnico</SelectItem>
+                              <SelectItem value="suporte">Suporte</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {isSuperAdmin ? (
+                          <div>
+                            <Label>Empresa</Label>
+                            <Select value={editingTraining.companyId} onValueChange={(value) => setEditingTraining({ ...editingTraining, companyId: value })}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione a empresa" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {companies.map((company) => (
+                                  <SelectItem key={company.id} value={company.id}>
+                                    {company.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ) : (
+                          <div>
+                            <Label>Empresa</Label>
+                            <Input value={getCompanyName(editingTraining.companyId)} disabled />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label>Conteúdo completo</Label>
+                        <Textarea rows={6} value={editingTraining.content} onChange={(e) => setEditingTraining({ ...editingTraining, content: e.target.value })} required />
+                      </div>
+                      <div className="flex justify-between">
+                        <Button
+                          variant="destructive"
+                          type="button"
+                          onClick={() => {
+                            if (editingTraining) {
+                              handleDeleteTraining(editingTraining.id);
+                              setTrainingEditModalOpen(false);
+                              setEditingTraining(null);
+                            }
+                          }}
+                        >
+                          Excluir
+                        </Button>
+                        <div className="flex gap-2">
+                          <Button type="button" variant="ghost" onClick={() => { setTrainingEditModalOpen(false); setEditingTraining(null); }}>
+                            Cancelar
+                          </Button>
+                          <Button type="submit">Salvar</Button>
+                        </div>
+                      </div>
+                    </form>
+                  ) : (
+                    <div>Nenhum treinamento selecionado.</div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+            <CardFooter className="justify-end border-t border-border/60 pt-4">
+              <span className="text-sm text-muted-foreground">Total: {accessibleTrainings.length} treinamento(s)</span>
+            </CardFooter>
+          </Card>
+      </div>
+    </AppLayout>
   );
 };
 

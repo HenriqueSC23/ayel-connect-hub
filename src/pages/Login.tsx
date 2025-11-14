@@ -39,7 +39,7 @@ const Login = () => {
     setLoading(false);
 
     if (success) {
-      navigate("/");  // Redireciona para mural após login
+      navigate("/inicio");  // Redireciona para início após login
     }
   };
 

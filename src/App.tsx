@@ -18,6 +18,9 @@ import Aniversariantes from "./pages/Aniversariantes";
 import Colaboradores from "./pages/Colaboradores";
 import Atalhos from "./pages/Atalhos";
 import Admin from "./pages/Admin";
+import Ramais from "./pages/Ramais";
+import Treinamentos from "./pages/Treinamentos";
+import TreinamentoDetalhe from "./pages/TreinamentoDetalhe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,12 +39,16 @@ const App = () => (
             <Route path="/recuperar-senha" element={<PasswordRecovery />} />
 
             {/* Rotas protegidas */}
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/" element={<Navigate to="/inicio" replace />} />
+            <Route path="/inicio" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
             <Route path="/aniversariantes" element={<ProtectedRoute><Aniversariantes /></ProtectedRoute>} />
             <Route path="/colaboradores" element={<ProtectedRoute><Colaboradores /></ProtectedRoute>} />
             <Route path="/atalhos" element={<ProtectedRoute><Atalhos /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            <Route path="/ramais" element={<ProtectedRoute><Ramais /></ProtectedRoute>} />
+            <Route path="/treinamentos" element={<ProtectedRoute><Treinamentos /></ProtectedRoute>} />
+            <Route path="/treinamentos/:id" element={<ProtectedRoute><TreinamentoDetalhe /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

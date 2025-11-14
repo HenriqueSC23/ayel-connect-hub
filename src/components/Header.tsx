@@ -25,6 +25,8 @@ import {
   Shield,
   LogOut,
   Search,
+  Phone,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/ayel-logo.jpg";
@@ -64,16 +66,16 @@ export const Header = () => {
       {/* Sidebar for desktop */}
       <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-64 border-r bg-background/95 z-50">
         <div className="flex h-16 items-center px-4 border-b">
-          <Link to="/" className="flex items-center">
+          <Link to="/inicio" className="flex items-center">
             <img src={logo} alt="Ayel Segurança e Tecnologia" className="h-10" />
           </Link>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
-          <Link to="/">
-            <Button variant={isActive("/") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+          <Link to="/inicio">
+            <Button variant={isActive("/inicio") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
               <Home className="h-5 w-5" />
-              <span>Mural</span>
+              <span>Início</span>
             </Button>
           </Link>
 
@@ -95,6 +97,20 @@ export const Header = () => {
             <Button variant={isActive("/colaboradores") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
               <Users className="h-5 w-5" />
               <span>Colaboradores</span>
+            </Button>
+          </Link>
+
+          <Link to="/treinamentos">
+            <Button variant={isActive("/treinamentos") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+              <BookOpen className="h-5 w-5" />
+              <span>Treinamentos</span>
+            </Button>
+          </Link>
+
+          <Link to="/ramais">
+            <Button variant={isActive("/ramais") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+              <Phone className="h-5 w-5" />
+              <span>Ramais</span>
             </Button>
           </Link>
 
@@ -134,14 +150,11 @@ export const Header = () => {
         </div>
       </aside>
 
-      {/* Spacer so main content is not under the fixed sidebar */}
-      <div className="hidden md:block md:w-64" />
-
       {/* Mobile header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
         <div className="container flex h-16 items-center justify-between px-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to="/inicio" className="flex items-center">
             <img src={logo} alt="Ayel Segurança e Tecnologia" className="h-10" />
           </Link>
 
