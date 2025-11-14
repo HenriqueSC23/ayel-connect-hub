@@ -31,7 +31,18 @@ import {
   updateTraining,
   deleteTraining,
 } from "@/data/mockData";
-import { Company, CompanyTarget, Ramal, Training, User, Event, Collaborator, PostRoleTarget } from "@/types";
+import {
+  Company,
+  CompanyTarget,
+  Ramal,
+  Training,
+  User,
+  Event,
+  Collaborator,
+  PostRoleTarget,
+  UserRole,
+  UserCategory,
+} from "@/types";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -46,6 +57,22 @@ const Admin = () => {
   const [companies, setCompanies] = useState<Company[]>([...mockCompanies]);
   const [ramais, setRamais] = useState<Ramal[]>([...mockRamais]);
   const [trainings, setTrainings] = useState<Training[]>([...mockTrainings]);
+
+  const categoryOptions: { label: string; value: UserCategory }[] = [
+    { label: "Vendedor", value: "vendedor" },
+    { label: "Técnico", value: "tecnico" },
+    { label: "RH", value: "rh" },
+    { label: "Administrativo", value: "administrativo" },
+    { label: "Outros", value: "outros" },
+  ];
+
+  const roleOptions: { label: string; value: UserRole }[] = [
+    { label: "Usuário", value: "user" },
+    { label: "Admin", value: "admin" },
+    { label: "Superadmin", value: "superadmin" },
+  ];
+
+  const NO_COMPANY_VALUE = "__none__";
 
   const [newCollaborator, setNewCollaborator] = useState({
     fullName: "",
@@ -93,8 +120,9 @@ const Admin = () => {
     email: "",
     password: "",
     fullName: "",
-    role: "user",
-    category: "outros",
+    role: "user" as UserRole,
+    category: "outros" as UserCategory,
+    companyId: defaultCompanyId,
   });
 
   const [newEvent, setNewEvent] = useState({
@@ -187,18 +215,28 @@ const Admin = () => {
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    const enforcedCompanyId = isSuperAdmin ? newUser.companyId : user?.companyId || newUser.companyId || defaultCompanyId;
     const created = await createUser({
       username: newUser.username,
       email: newUser.email,
       password: newUser.password,
       fullName: newUser.fullName,
-      role: "user",
-      category: newUser.category as any,
+      role: newUser.role,
+      category: newUser.category,
+      companyId: enforcedCompanyId || undefined,
       setor: "",
       birthDate: "",
-    } as any);
+    } as User);
     setUsers((s) => [created, ...s]);
-    setNewUser({ username: "", email: "", password: "", fullName: "", role: "user", category: "outros" });
+    setNewUser({
+      username: "",
+      email: "",
+      password: "",
+      fullName: "",
+      role: "user",
+      category: "outros",
+      companyId: isSuperAdmin ? (companies[0]?.id || defaultCompanyId) : (user?.companyId || defaultCompanyId),
+    });
   };
 
   const handleDeleteUser = (id: string) => {
@@ -208,9 +246,11 @@ const Admin = () => {
   };
 
   const handleUpdateUser = (data: User) => {
+    const enforcedCompanyId = isSuperAdmin ? data.companyId : user?.companyId || data.companyId;
+    const payload: User = { ...data, companyId: enforcedCompanyId };
     const idx = mockUsers.findIndex(u => u.id === data.id);
     if (idx !== -1) {
-      mockUsers[idx] = { ...mockUsers[idx], ...data };
+      mockUsers[idx] = { ...mockUsers[idx], ...payload };
       setUsers([...mockUsers]);
     }
     setEditUserModalOpen(false);
@@ -381,6 +421,55 @@ const Admin = () => {
                         <Label>Senha</Label>
                         <Input type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} required />
                       </div>
+                      <div>
+                        <Label>Função / setor *</Label>
+                        <Select value={newUser.category} onValueChange={(value) => setNewUser({ ...newUser, category: value as UserCategory })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a função" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categoryOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Empresa *</Label>
+                        {isSuperAdmin ? (
+                          <Select value={newUser.companyId} onValueChange={(value) => setNewUser({ ...newUser, companyId: value })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a empresa" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {companies.map((company) => (
+                                <SelectItem key={company.id} value={company.id}>
+                                  {company.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input value={getCompanyName(user?.companyId || defaultCompanyId)} disabled />
+                        )}
+                      </div>
+                      <div>
+                        <Label>Nível de acesso</Label>
+                        <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value as UserRole })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o nível" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {roleOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="flex justify-end">
                         <Button type="submit">Criar</Button>
                       </div>
@@ -425,15 +514,97 @@ const Admin = () => {
                     <form onSubmit={(e) => { e.preventDefault(); handleUpdateUser(editingUser); }} className="space-y-3">
                       <div>
                         <Label>Nome</Label>
-                        <Input value={editingUser.fullName} onChange={(e) => setEditingUser({...editingUser, fullName: e.target.value} as User)} required />
+                        <Input
+                          value={editingUser.fullName}
+                          onChange={(e) =>
+                            setEditingUser((prev) => (prev ? ({ ...prev, fullName: e.target.value } as User) : prev))
+                          }
+                          required
+                        />
                       </div>
                       <div>
                         <Label>Email</Label>
-                        <Input type="email" value={editingUser.email} onChange={(e) => setEditingUser({...editingUser, email: e.target.value} as User)} />
+                        <Input
+                          type="email"
+                          value={editingUser.email}
+                          onChange={(e) =>
+                            setEditingUser((prev) => (prev ? ({ ...prev, email: e.target.value } as User) : prev))
+                          }
+                        />
                       </div>
                       <div>
-                        <Label>Categoria</Label>
-                        <Input value={editingUser.category} onChange={(e) => setEditingUser({...editingUser, category: e.target.value as any} as User)} />
+                        <Label>Função / setor</Label>
+                        <Select
+                          value={editingUser.category}
+                          onValueChange={(value) =>
+                            setEditingUser((prev) =>
+                              prev ? ({ ...prev, category: value as UserCategory } as User) : prev
+                            )
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a função" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categoryOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Empresa</Label>
+                        {isSuperAdmin ? (
+                          <Select
+                            value={editingUser.companyId ?? NO_COMPANY_VALUE}
+                            onValueChange={(value) =>
+                              setEditingUser((prev) =>
+                                prev
+                                  ? ({
+                                      ...prev,
+                                      companyId: value === NO_COMPANY_VALUE ? undefined : value,
+                                    } as User)
+                                  : prev
+                              )
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a empresa" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={NO_COMPANY_VALUE}>Sem empresa definida</SelectItem>
+                              {companies.map((company) => (
+                                <SelectItem key={company.id} value={company.id}>
+                                  {company.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input value={getCompanyName(user?.companyId || editingUser.companyId || defaultCompanyId)} disabled />
+                        )}
+                      </div>
+                      <div>
+                        <Label>Nível de acesso</Label>
+                        <Select
+                          value={editingUser.role}
+                          onValueChange={(value) =>
+                            setEditingUser((prev) => (prev ? ({ ...prev, role: value as UserRole } as User) : prev))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o nível" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {roleOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="flex justify-between">
                         <Button variant="destructive" onClick={() => { handleDeleteUser(editingUser.id); setEditUserModalOpen(false); }}>Excluir</Button>
