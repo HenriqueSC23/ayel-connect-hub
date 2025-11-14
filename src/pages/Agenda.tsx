@@ -80,59 +80,66 @@ const Agenda = () => {
   }, []);
 
   const selectedKey = selectedDate ? toKey(selectedDate) : undefined;
+  const weekdayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
   return (
     <AppLayout maxWidthClass="max-w-5xl">
       <h1 className="text-3xl font-bold mb-6">Agenda do Mês</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <Card className="h-full">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Calendário</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="p-0 h-full">
+          <CardContent className="p-6 pt-2 h-full flex justify-center">
             <TooltipProvider>
-              <Calendar
-                className="h-full"
-                mode="single"
-                selected={selectedDate}
-                onDayClick={(day) => setSelectedDate(day || undefined)}
-                modifiers={{ hasEvent: eventDates }}
-                modifiersClassNames={{ hasEvent: "ring-2 ring-primary/50 rounded-full" }}
-                components={{
-                  Day: ({ date, ...dayProps }: any) => {
-                    const key = toKey(date);
-                    const evs = eventsByDate[key] || [];
-                    const title = evs.length === 0 ? "" : evs.map((x: any) => x.title).join("\n");
-                    return (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div {...dayProps} className={`w-full h-full flex flex-col items-center justify-center ${dayProps.className || ""}`}>
-                            <div className="flex flex-col items-center gap-1">
-                              <div className="text-[0.72rem]">{date.getDate()}</div>
-                              <div className="flex items-center gap-1 mt-1">
-                                {evs.slice(0, 3).map((ev: any) => (
-                                  <span key={ev.id} className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: ev.color }} />
-                                ))}
-                                {evs.length > 3 && (
-                                  <span className="text-[0.65rem] text-muted-foreground">+{evs.length - 3}</span>
-                                )}
+              <div className="w-full max-w-[600px] mx-auto">
+                <Calendar
+                  className="w-full [&_.rdp-months]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full [&_.rdp-table]:table-fixed"
+                  mode="single"
+                  selected={selectedDate}
+                  onDayClick={(day) => setSelectedDate(day || undefined)}
+                  modifiers={{ hasEvent: eventDates }}
+                  modifiersClassNames={{ hasEvent: "ring-2 ring-primary/50 rounded-full" }}
+                  locale={ptBR}
+                  formatters={{
+                    weekdayName: (date) => weekdayNames[date.getDay()],
+                  }}
+                  components={{
+                    Day: ({ date, ...dayProps }: any) => {
+                      const key = toKey(date);
+                      const evs = eventsByDate[key] || [];
+                      const title = evs.length === 0 ? "" : evs.map((x: any) => x.title).join("\n");
+                      return (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div {...dayProps} className={`w-full h-full flex flex-col items-center justify-center ${dayProps.className || ""}`}>
+                              <div className="flex flex-col items-center gap-1">
+                                <div className="text-[0.72rem]">{date.getDate()}</div>
+                                <div className="flex items-center gap-1 mt-1">
+                                  {evs.slice(0, 3).map((ev: any) => (
+                                    <span key={ev.id} className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: ev.color }} />
+                                  ))}
+                                  {evs.length > 3 && (
+                                    <span className="text-[0.65rem] text-muted-foreground">+{evs.length - 3}</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </TooltipTrigger>
-                        {evs.length > 0 && (
-                          <TooltipContent>
-                            <div className="whitespace-pre-line max-w-xs">{title}</div>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    );
-                  },
-                }}
-              />
+                          </TooltipTrigger>
+                          {evs.length > 0 && (
+                            <TooltipContent>
+                              <div className="whitespace-pre-line max-w-xs">{title}</div>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      );
+                    },
+                  }}
+                />
+              </div>
             </TooltipProvider>
           </CardContent>
         </Card>
@@ -142,7 +149,7 @@ const Agenda = () => {
             <CardHeader>
               <CardTitle>Eventos {selectedKey ? `em ${format(keyToDate(selectedKey as string), "dd/MM/yyyy")}` : "do mês"}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               {selectedKey ? (
                 (eventsByDate[selectedKey] || []).length === 0 ? (
                   <p className="text-muted-foreground">Nenhum evento nesta data.</p>
