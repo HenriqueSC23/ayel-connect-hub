@@ -33,6 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DayProps } from "react-day-picker";
+import { filterBySelectors } from "@/lib/audience";
 import { CompanyTarget, Event, PostRoleTarget } from "@/types";
 
 const roleFilterOptions: { label: string; value: PostRoleTarget }[] = [
@@ -72,13 +74,10 @@ const Agenda = () => {
 
   // Normaliza datas para o dia local (evita problemas de fuso)
   // Filtra eventos de acordo com filtros selecionados
-  const filteredEvents = useMemo(() => {
-    return localEvents.filter(
-      (ev) =>
-        (roleFilter === "all" || ev.roleTarget === roleFilter) &&
-        (companyFilter === "all" || ev.companyTarget === companyFilter),
-    );
-  }, [localEvents, roleFilter, companyFilter]);
+  const filteredEvents = useMemo(
+    () => filterBySelectors(localEvents, roleFilter, companyFilter),
+    [localEvents, roleFilter, companyFilter],
+  );
 
   // Cria Dates locais a partir das strings 'YYYY-MM-DD' (evita parseISO/UTC)
   const eventDates = useMemo(() => {
@@ -93,7 +92,7 @@ const Agenda = () => {
     filteredEvents.forEach((ev) => {
       // Presume ev.date está no formato 'YYYY-MM-DD' e usa a string como chave
       const key = ev.date;
-      if (!map[key]) map[key] = [] as any;
+      if (!map[key]) map[key] = [];
       map[key].push(ev);
     });
     return map;
@@ -128,18 +127,23 @@ const Agenda = () => {
                     formatWeekdayName: (date) => weekdayNames[date.getDay()],
                   }}
                   components={{
-                    Day: ({ date, ...dayProps }: any) => {
+                    Day: (dayProps: DayProps) => {
+                      const { date, className: dayClassName, ...buttonProps } = dayProps;
                       const key = toKey(date);
-                      const evs = eventsByDate[key] || [];
-                      const title = evs.length === 0 ? "" : evs.map((x: any) => x.title).join("\n");
+                      const evs: Event[] = eventsByDate[key] ?? [];
+                      const title = evs.length === 0 ? "" : evs.map((event) => event.title).join("\n");
                       return (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div {...dayProps} className={`w-full h-full flex flex-col items-center justify-center ${dayProps.className || ""}`}>
+                            <button
+                              {...buttonProps}
+                              type="button"
+                              className={`w-full h-full flex flex-col items-center justify-center ${dayClassName || ""}`}
+                            >
                               <div className="flex flex-col items-center gap-1">
                                 <div className="text-[0.72rem]">{date.getDate()}</div>
                                 <div className="flex items-center gap-1 mt-1">
-                                  {evs.slice(0, 3).map((ev: any) => (
+                                  {evs.slice(0, 3).map((ev) => (
                                     <span key={ev.id} className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: ev.color }} />
                                   ))}
                                   {evs.length > 3 && (
@@ -147,7 +151,7 @@ const Agenda = () => {
                                   )}
                                 </div>
                               </div>
-                            </div>
+                            </button>
                           </TooltipTrigger>
                           {evs.length > 0 && (
                             <TooltipContent>

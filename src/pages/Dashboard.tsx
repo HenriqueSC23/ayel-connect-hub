@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CompanyTarget, Post, PostRoleTarget } from "@/types";
+import { filterPostsByAdminSelectors, filterPostsForMobileView, getImportantPosts } from "@/lib/posts";
 import { Switch } from "@/components/ui/switch";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -52,20 +53,15 @@ const Dashboard = () => {
   const visiblePosts = getVisiblePosts(user);
 
   const basePosts = isAdmin
-    ? mockPosts.filter(
-        (post) =>
-          (adminRoleFilter === "all" || post.roleTarget === adminRoleFilter) &&
-          (adminCompanyFilter === "all" || post.companyTarget === adminCompanyFilter),
-      )
+    ? filterPostsByAdminSelectors(mockPosts, adminRoleFilter, adminCompanyFilter)
     : visiblePosts;
 
-  const importantPosts = useMemo(
-    () => basePosts.filter((post) => post.isImportant),
-    [basePosts],
-  );
+  const importantPosts = useMemo(() => getImportantPosts(basePosts), [basePosts]);
 
-  const postsToShow =
-    mobilePostFilter === "important" ? importantPosts : basePosts;
+  const postsToShow = useMemo(
+    () => filterPostsForMobileView(basePosts, mobilePostFilter),
+    [basePosts, mobilePostFilter],
+  );
 
   const handleCreatePost = (e: React.FormEvent) => {
     e.preventDefault();

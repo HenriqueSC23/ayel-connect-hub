@@ -35,6 +35,7 @@ import {
   Training,
   Company,
 } from "@/types";
+import { filterItemsForUser } from "@/lib/audience";
 
 // ============================================
 // USUÁRIOS
@@ -181,15 +182,7 @@ export const posts: Post[] = [
   },
 ];
 
-export const getVisiblePosts = (user: User | null): Post[] => {
-  if (!user) return posts;
-  if (user.role === "admin" || user.role === "superadmin") return posts;
-  return posts.filter(
-    (post) =>
-      (post.roleTarget === "all" || post.roleTarget === user.category) &&
-      (post.companyTarget === "all" || post.companyTarget === user.companyId),
-  );
-};
+export const getVisiblePosts = (user: User | null): Post[] => filterItemsForUser(posts, user);
 
 
 

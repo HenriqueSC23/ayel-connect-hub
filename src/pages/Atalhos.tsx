@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { shortcuts } from "@/data/mockData";
 import { ExternalLink, Users, Wrench } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 const Atalhos = () => {
   const primary = shortcuts.filter(
@@ -15,7 +16,7 @@ const Atalhos = () => {
     description: "Serviço sugerido disponível em breve",
   }));
 
-  const iconMap: Record<string, any> = {
+  const iconMap: Record<string, LucideIcon> = {
     Users,
     Wrench,
   };
