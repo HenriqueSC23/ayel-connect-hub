@@ -33,8 +33,8 @@ import {
   BlogPost,
   Ramal,
   Training,
+  Company,
 } from "@/types";
-import { Company } from "@/types";
 
 // ============================================
 // USUÁRIOS
@@ -238,6 +238,8 @@ export const events: Event[] = [
     color: "#EF4444",
     createdBy: "1",
     companyId: "c1",
+    roleTarget: "all",
+    companyTarget: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -249,6 +251,8 @@ export const events: Event[] = [
     color: "#10B981",
     createdBy: "1",
     companyId: "c1",
+    roleTarget: "all",
+    companyTarget: "all",
     createdAt: new Date().toISOString(),
   },
   {
@@ -260,6 +264,8 @@ export const events: Event[] = [
     color: "#3B82F6",
     createdBy: "1",
     companyId: "c1",
+    roleTarget: "all",
+    companyTarget: "c1",
     createdAt: new Date().toISOString(),
   },
   {
@@ -271,6 +277,8 @@ export const events: Event[] = [
     color: "#F59E0B",
     createdBy: "1",
     companyId: "c2",
+    roleTarget: "vendedor",
+    companyTarget: "c2",
     createdAt: new Date().toISOString(),
   },
   {
@@ -282,6 +290,8 @@ export const events: Event[] = [
     color: "#EF4444",
     createdBy: "1",
     companyId: "c2",
+    roleTarget: "all",
+    companyTarget: "all",
     createdAt: new Date().toISOString(),
   },
 ];

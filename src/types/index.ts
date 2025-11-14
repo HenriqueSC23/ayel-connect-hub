@@ -122,6 +122,8 @@ export interface Event {
   createdBy: string;             // Foreign key para users.id
   createdAt: string;             // Data de criação
   companyId?: string;
+  roleTarget: PostRoleTarget;
+  companyTarget: CompanyTarget;
 }
 
 // ============================================

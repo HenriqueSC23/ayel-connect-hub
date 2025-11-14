@@ -31,8 +31,7 @@ import {
   updateTraining,
   deleteTraining,
 } from "@/data/mockData";
-import { Company, Ramal, Training } from "@/types";
-import { User, Event, Collaborator } from "@/types";
+import { Company, CompanyTarget, Ramal, Training, User, Event, Collaborator, PostRoleTarget } from "@/types";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -104,6 +103,8 @@ const Admin = () => {
     date: "",
     type: "outro",
     color: "#3B82F6",
+    roleTarget: "all" as PostRoleTarget,
+    companyTarget: "all" as CompanyTarget,
   });
 
   // Companies (multiempresa) - criação rápida
@@ -227,10 +228,12 @@ const Admin = () => {
       color: newEvent.color,
       createdBy: "admin",
       createdAt: new Date().toISOString(),
+      roleTarget: newEvent.roleTarget,
+      companyTarget: newEvent.companyTarget,
     } as Event;
     mockEvents.unshift(ev);
     setEvents([...mockEvents]);
-    setNewEvent({ title: "", description: "", date: "", type: "outro", color: "#3B82F6" });
+    setNewEvent({ title: "", description: "", date: "", type: "outro", color: "#3B82F6", roleTarget: "all", companyTarget: "all" });
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -483,6 +486,38 @@ const Admin = () => {
                         <Label>Cor (hex)</Label>
                         <Input value={newEvent.color} onChange={(e) => setNewEvent({...newEvent, color: e.target.value})} />
                       </div>
+                      <div>
+                        <Label>Função / setor alvo *</Label>
+                        <Select value={newEvent.roleTarget} onValueChange={(value) => setNewEvent({ ...newEvent, roleTarget: value as PostRoleTarget })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todos os setores</SelectItem>
+                            <SelectItem value="vendedor">Vendedores</SelectItem>
+                            <SelectItem value="tecnico">Técnicos</SelectItem>
+                            <SelectItem value="rh">RH</SelectItem>
+                            <SelectItem value="administrativo">Administrativo</SelectItem>
+                            <SelectItem value="outros">Outros</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Empresa alvo *</Label>
+                        <Select value={newEvent.companyTarget} onValueChange={(value) => setNewEvent({ ...newEvent, companyTarget: value as CompanyTarget })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todas as empresas</SelectItem>
+                            {companies.map((company) => (
+                              <SelectItem key={company.id} value={company.id}>
+                                {company.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="flex justify-end">
                         <Button type="submit">Salvar evento</Button>
                       </div>
@@ -536,6 +571,38 @@ const Admin = () => {
                       <div>
                         <Label>Data</Label>
                         <Input type="date" value={editingEvent.date} onChange={(e) => setEditingEvent({...editingEvent, date: e.target.value} as Event)} />
+                      </div>
+                      <div>
+                        <Label>Função / setor alvo *</Label>
+                        <Select value={editingEvent.roleTarget} onValueChange={(value) => setEditingEvent({...editingEvent, roleTarget: value as PostRoleTarget} as Event)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todos os setores</SelectItem>
+                            <SelectItem value="vendedor">Vendedores</SelectItem>
+                            <SelectItem value="tecnico">Técnicos</SelectItem>
+                            <SelectItem value="rh">RH</SelectItem>
+                            <SelectItem value="administrativo">Administrativo</SelectItem>
+                            <SelectItem value="outros">Outros</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Empresa alvo *</Label>
+                        <Select value={editingEvent.companyTarget} onValueChange={(value) => setEditingEvent({...editingEvent, companyTarget: value as CompanyTarget} as Event)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todas as empresas</SelectItem>
+                            {companies.map((company) => (
+                              <SelectItem key={company.id} value={company.id}>
+                                {company.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="flex justify-between">
                         <Button variant="destructive" onClick={() => { handleDeleteEvent(editingEvent.id); setEditEventModalOpen(false); }}>Excluir</Button>

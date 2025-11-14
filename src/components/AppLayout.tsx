@@ -2,7 +2,7 @@ import { ReactNode, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { cn } from "@/lib/utils";
-import { Home, Calendar, BookOpen, Phone, User } from "lucide-react";
+import { Home, Calendar, BookOpen, Phone } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -147,3 +147,4 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     </div>
   );
 };
+
