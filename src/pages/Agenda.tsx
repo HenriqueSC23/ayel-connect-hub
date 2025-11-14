@@ -105,7 +105,7 @@ const Agenda = () => {
                   modifiersClassNames={{ hasEvent: "ring-2 ring-primary/50 rounded-full" }}
                   locale={ptBR}
                   formatters={{
-                    weekdayName: (date) => weekdayNames[date.getDay()],
+                    formatWeekdayName: (date) => weekdayNames[date.getDay()],
                   }}
                   components={{
                     Day: ({ date, ...dayProps }: any) => {

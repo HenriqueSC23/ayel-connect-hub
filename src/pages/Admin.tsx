@@ -655,7 +655,16 @@ const Admin = () => {
                       </div>
                       <div>
                         <Label>Cor (hex)</Label>
-                        <Input value={newEvent.color} onChange={(e) => setNewEvent({...newEvent, color: e.target.value})} />
+                        <div className="flex items-center gap-3">
+                          <Input value={newEvent.color} onChange={(e) => setNewEvent({...newEvent, color: e.target.value})} />
+                          <input
+                            type="color"
+                            value={newEvent.color}
+                            onChange={(e) => setNewEvent({...newEvent, color: e.target.value})}
+                            aria-label="Selecionar cor do evento"
+                            className="h-10 w-10 rounded-xl border p-0"
+                          />
+                        </div>
                       </div>
                       <div>
                         <Label>Função / setor alvo *</Label>
