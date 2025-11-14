@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { companies as mockCompanies, events as mockEvents } from "@/data/mockData";
+import { events as mockEvents } from "@/data/mockData";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,12 +26,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CompanyTarget, Event, PostRoleTarget } from "@/types";
-import { useAuth } from "@/contexts/AuthContext";
+import { Event } from "@/types";
 
 const Agenda = () => {
-  const { user, isAdmin } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const toKey = (d: Date) => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
@@ -45,35 +42,23 @@ const Agenda = () => {
   };
 
   // UX state: local events copy (so we can mutate in UI), filters and create modal
-  const [localEvents] = useState<Event[]>([...mockEvents]);
-  const [filters] = useState<string[]>([]); // placeholder for type filters
-  const [roleFilter, setRoleFilter] = useState<PostRoleTarget>("all");
-  const [companyFilter, setCompanyFilter] = useState<CompanyTarget>("all");
+  const [localEvents, setLocalEvents] = useState<Event[]>([...mockEvents]);
+  const [filters, setFilters] = useState<string[]>([]); // empty = all
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newEvent, setNewEvent] = useState({
+    title: "",
+    description: "",
+    date: "",
+    type: "outro",
+    color: "#3B82F6",
+  });
 
   // Normaliza datas para o dia local (evita problemas de fuso)
   // Filtra eventos de acordo com filtros selecionados
   const filteredEvents = useMemo(() => {
-    let events = [...localEvents];
-
-    if (!isAdmin && user) {
-      events = events.filter(
-        (event) =>
-          (event.roleTarget === "all" || event.roleTarget === user.category) &&
-          (event.companyTarget === "all" || event.companyTarget === user.companyId),
-      );
-    }
-
-    if (isAdmin) {
-      events = events.filter(
-        (event) =>
-          (roleFilter === "all" || event.roleTarget === roleFilter) &&
-          (companyFilter === "all" || event.companyTarget === companyFilter),
-      );
-    }
-
-    if (!filters || filters.length === 0) return events;
-    return events.filter((ev) => filters.includes(ev.type));
-  }, [localEvents, filters, isAdmin, user, roleFilter, companyFilter]);
+    if (!filters || filters.length === 0) return localEvents;
+    return localEvents.filter((ev) => filters.includes(ev.type));
+  }, [localEvents, filters]);
 
   // Cria Dates locais a partir das strings 'YYYY-MM-DD' (evita parseISO/UTC)
   const eventDates = useMemo(() => {
@@ -86,34 +71,16 @@ const Agenda = () => {
   const eventsByDate = useMemo(() => {
     const map: Record<string, Event[]> = {};
     filteredEvents.forEach((ev) => {
+      // Presume ev.date está no formato 'YYYY-MM-DD' e usa a string como chave
       const key = ev.date;
-      if (!map[key]) {
-        map[key] = [];
-      }
+      if (!map[key]) map[key] = [] as any;
       map[key].push(ev);
     });
     return map;
-  }, [filteredEvents]);
+  }, []);
 
   const selectedKey = selectedDate ? toKey(selectedDate) : undefined;
   const weekdayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-  const getRoleLabel = (role: PostRoleTarget) => {
-    const labels: Record<PostRoleTarget, string> = {
-      all: "Todos os setores",
-      vendedor: "Vendedores",
-      tecnico: "Técnicos",
-      rh: "RH",
-      administrativo: "Administrativo",
-      outros: "Outros",
-    };
-    return labels[role] || role;
-  };
-
-  const getCompanyLabel = (target: CompanyTarget) => {
-    if (target === "all") return "Todas as empresas";
-    return mockCompanies.find((company) => company.id === target)?.nome || "Empresa";
-  };
 
   return (
     <AppLayout maxWidthClass="max-w-5xl">
@@ -183,42 +150,6 @@ const Agenda = () => {
               <CardTitle>Eventos {selectedKey ? `em ${format(keyToDate(selectedKey as string), "dd/MM/yyyy")}` : "do mês"}</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              {isAdmin && (
-                <div className="mb-4 grid gap-3 md:grid-cols-2">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Função / setor</Label>
-                    <Select value={roleFilter} onValueChange={(value) => setRoleFilter(value as PostRoleTarget)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Todos os setores" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover">
-                        <SelectItem value="all">Todos os setores</SelectItem>
-                        <SelectItem value="vendedor">Vendedores</SelectItem>
-                        <SelectItem value="tecnico">Técnicos</SelectItem>
-                        <SelectItem value="rh">RH</SelectItem>
-                        <SelectItem value="administrativo">Administrativo</SelectItem>
-                        <SelectItem value="outros">Outros</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Empresa</Label>
-                    <Select value={companyFilter} onValueChange={(value) => setCompanyFilter(value as CompanyTarget)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Todas as empresas" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover">
-                        <SelectItem value="all">Todas as empresas</SelectItem>
-                        {mockCompanies.map((company) => (
-                          <SelectItem key={company.id} value={company.id}>
-                            {company.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )}
               {selectedKey ? (
                 (eventsByDate[selectedKey] || []).length === 0 ? (
                   <p className="text-muted-foreground">Nenhum evento nesta data.</p>
@@ -240,14 +171,6 @@ const Agenda = () => {
                         </div>
                         <Badge style={{ backgroundColor: ev.color }}>{ev.type}</Badge>
                       </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <Badge variant="secondary" className="text-[10px] px-2 py-1">
-                          {getRoleLabel(ev.roleTarget)}
-                        </Badge>
-                        <Badge variant="outline" className="text-[10px] px-2 py-1">
-                          {getCompanyLabel(ev.companyTarget)}
-                        </Badge>
-                      </div>
                       <p className="text-sm text-muted-foreground mt-2">{ev.description}</p>
                     </div>
                   ))
@@ -265,29 +188,19 @@ const Agenda = () => {
                           <div className="flex items-start justify-between">
                             <div>
                               <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: ev.color + "20" }}>
-                              <CalendarIcon className="h-4 w-4" style={{ color: ev.color }} />
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: ev.color + "20" }}>
+                                  <CalendarIcon className="h-4 w-4" style={{ color: ev.color }} />
+                                </div>
+                                <div>
+                                  <div className="font-medium">{ev.title}</div>
+                                  <div className="text-xs text-muted-foreground">{ev.description}</div>
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="font-medium">{ev.title}</div>
-                              <div className="text-xs text-muted-foreground">{ev.description}</div>
-                            </div>
+                            <Badge style={{ backgroundColor: ev.color }}>{ev.type}</Badge>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <Badge style={{ backgroundColor: ev.color }}>{ev.type}</Badge>
-                          <div className="flex gap-2 flex-wrap justify-end">
-                            <Badge variant="secondary" className="text-[10px] px-2 py-1">
-                              {getRoleLabel(ev.roleTarget)}
-                            </Badge>
-                            <Badge variant="outline" className="text-[10px] px-2 py-1">
-                              {getCompanyLabel(ev.companyTarget)}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      ))}
                     </div>
                   ))
               )}
