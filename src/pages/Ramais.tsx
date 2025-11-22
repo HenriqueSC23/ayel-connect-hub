@@ -9,11 +9,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Separator } from "@/components/ui/separator";
 
 const Ramais = () => {
-  const { user } = useAuth();
-  const isSuperAdmin = user?.role === "superadmin";
+  const { user, isAdmin } = useAuth();
   const [ramaisList, setRamaisList] = useState<Ramal[]>([]);
   const [companyFilter, setCompanyFilter] = useState<string>(
-    isSuperAdmin ? "all" : user?.companyId ?? "all",
+    isAdmin ? "all" : user?.companyId ?? "all",
   );
 
   useEffect(() => {
@@ -21,17 +20,17 @@ const Ramais = () => {
   }, []);
 
   useEffect(() => {
-    if (!isSuperAdmin && user?.companyId) {
+    if (!isAdmin && user?.companyId) {
       setCompanyFilter(user.companyId);
     }
-  }, [isSuperAdmin, user?.companyId]);
+  }, [isAdmin, user?.companyId]);
 
   const resolvedCompanyId = useMemo(() => {
-    if (isSuperAdmin) {
+    if (isAdmin) {
       return companyFilter === "all" ? undefined : companyFilter;
     }
-    return user?.companyId;
-  }, [companyFilter, isSuperAdmin, user?.companyId]);
+    return user?.companyId || undefined;
+  }, [companyFilter, isAdmin, user?.companyId]);
 
   const filteredRamais = useMemo(() => {
     return ramaisList.filter((ramal) => {
@@ -76,7 +75,7 @@ const Ramais = () => {
         </p>
       </div>
 
-      {isSuperAdmin && (
+      {isAdmin && (
         <Card className="border-dashed">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Filtrar por empresa</CardTitle>
@@ -132,7 +131,7 @@ const Ramais = () => {
                       )}
                     </div>
                     <div className="text-right text-xs text-muted-foreground">
-                      {isSuperAdmin && (
+                      {isAdmin && (
                         <>
                           <span className="font-medium block">{getCompanyName(ramal.companyId)}</span>
                           <Separator className="my-1" />

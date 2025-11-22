@@ -104,7 +104,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-light to-background p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md max-h-[calc(100vh_-_2rem)] overflow-y-auto shadow-lg">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
             <img src={logo} alt="TGA Intranet" className="h-14" />
@@ -134,19 +134,36 @@ const Register = () => {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="username">Usuário *</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="joao.silva"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                required
-              />
-              {errors.username && (
-                <p className="text-sm text-destructive">{errors.username}</p>
-              )}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="username">Usuário *</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="joao.silva"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  required
+                />
+                {errors.username && (
+                  <p className="text-sm text-destructive">{errors.username}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password}</p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -211,21 +228,6 @@ const Register = () => {
               </Select>
               {errors.category && (
                 <p className="text-sm text-destructive">{errors.category}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha *</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
               )}
             </div>
 

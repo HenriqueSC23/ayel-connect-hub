@@ -50,7 +50,7 @@ export const users: User[] = [
     phone: "(11) 4002-1000",
     password: "admin123", // ⚠️ NUNCA armazene senha em texto plano no backend!
     fullName: "Administrador Sistema",
-    role: "superadmin",
+    role: "admin",
     category: "administrativo",
     setor: "TI",
     birthDate: "1990-05-15",

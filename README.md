@@ -28,7 +28,7 @@ Ayel Connect Hub é a intranet multiempresas da Ayel Segurança e Tecnologia. O 
 3. **Dados:** `src/data/mockData.ts` fornece mocks e helpers CRUD (assíncronos para simular API). `AuthContext` orquestra autenticação, permissões e persistência.  
 
 ### Entidades
-- **User:** dados pessoais, `role` (`user`, `admin`, `superadmin`), `category` (função/setor), `companyId`.  
+- **User:** dados pessoais, `role` (`user` ou `admin`), `category` (função/setor), `companyId`.  
 - **Company:** id, nome, CNPJ, logomarca, cor.  
 - **Post:** autor, título, conteúdo, imagem, `roleTarget`, `companyTarget`, `isImportant`, `likes`, `createdAt`.  
 - **Event:** título, data, tipo, descrição, cor, `roleTarget`, `companyTarget`, metadados de criação.  
@@ -40,7 +40,7 @@ Ayel Connect Hub é a intranet multiempresas da Ayel Segurança e Tecnologia. O 
 - Usuário → possui `companyId` + função.  
 - Conteúdo → traz `companyTarget` (ou `companyId`) e `roleTarget`.  
 - Visibilidade → `(companyTarget === "all" || companyTarget === user.companyId)` **E** `(roleTarget === "all" || roleTarget === user.category)`.  
-- Admin/Superadmin ignoram filtros e enxergam todos os registros.  
+- Admin ignora filtros e enxerga todos os registros.  
 
 ## Estrutura de Pastas
 ```
@@ -62,8 +62,8 @@ src/
 ### Autenticação / Usuário
 - `AuthContext` guarda `user`, `login`, `logout`, `register`, `isAdmin`.  
 - Login usa `findUserByCredentials` (mock). Registro usa `createUser`.  
-- Roles: `user` (colaborador), `admin`, `superadmin` (acesso total). `isAdmin` inclui superadmin.  
-- Permissões: Admin/Superadmin acessam painel `/admin` e veem todos os dados; colaborador só vê o que pertence à sua função/empresa.  
+- Roles: `user` (colaborador) e `admin` (acesso total).  
+- Permissões: Admin acessa painel `/admin` e vê todos os dados; colaborador só vê o que pertence à sua função/empresa.  
 
 ### Multiempresa
 - Empresas vêm de `mockData.companies`; Admin pode criar/editar no painel.  

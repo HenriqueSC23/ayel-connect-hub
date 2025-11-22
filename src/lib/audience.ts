@@ -7,7 +7,7 @@ type TargetedEntity = {
 
 export const matchesUserAudience = <T extends TargetedEntity>(item: T, user: User | null): boolean => {
   if (!user) return true;
-  if (user.role === "admin" || user.role === "superadmin") return true;
+  if (user.role === "admin") return true;
 
   const matchesRole = item.roleTarget === "all" || item.roleTarget === user.category;
   const matchesCompany =
@@ -17,7 +17,7 @@ export const matchesUserAudience = <T extends TargetedEntity>(item: T, user: Use
 };
 
 export const filterItemsForUser = <T extends TargetedEntity>(items: T[], user: User | null): T[] => {
-  if (!user || user.role === "admin" || user.role === "superadmin") {
+  if (!user || user.role === "admin") {
     return items;
   }
   return items.filter((item) => matchesUserAudience(item, user));

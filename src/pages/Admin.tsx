@@ -48,8 +48,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Admin = () => {
-  const { user } = useAuth();
-  const isSuperAdmin = user?.role === "superadmin";
+  const { user, isAdmin } = useAuth();
+  const hasGlobalAccess = isAdmin;
   const defaultCompanyId = user?.companyId || mockCompanies[0]?.id || "";
   const [users, setUsers] = useState<User[]>([...mockUsers]);
   const [events, setEvents] = useState<Event[]>([...mockEvents]);
@@ -69,7 +69,6 @@ const Admin = () => {
   const roleOptions: { label: string; value: UserRole }[] = [
     { label: "Usuário", value: "user" },
     { label: "Admin", value: "admin" },
-    { label: "Superadmin", value: "superadmin" },
   ];
 
   const NO_COMPANY_VALUE = "__none__";
@@ -217,7 +216,7 @@ const Admin = () => {
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    const enforcedCompanyId = isSuperAdmin ? newUser.companyId : user?.companyId || newUser.companyId || defaultCompanyId;
+    const enforcedCompanyId = hasGlobalAccess ? newUser.companyId : user?.companyId || newUser.companyId || defaultCompanyId;
     const created = await createUser({
       username: newUser.username,
       email: newUser.email,
@@ -241,7 +240,7 @@ const Admin = () => {
       photoUrl: "",
       role: "user",
       category: "outros",
-      companyId: isSuperAdmin ? (companies[0]?.id || defaultCompanyId) : (user?.companyId || defaultCompanyId),
+      companyId: hasGlobalAccess ? (companies[0]?.id || defaultCompanyId) : (user?.companyId || defaultCompanyId),
     });
   };
 
@@ -252,7 +251,7 @@ const Admin = () => {
   };
 
   const handleUpdateUser = (data: User) => {
-    const enforcedCompanyId = isSuperAdmin ? data.companyId : user?.companyId || data.companyId;
+    const enforcedCompanyId = hasGlobalAccess ? data.companyId : user?.companyId || data.companyId;
     const payload: User = { ...data, companyId: enforcedCompanyId };
     const idx = mockUsers.findIndex(u => u.id === data.id);
     if (idx !== -1) {
@@ -305,13 +304,13 @@ const Admin = () => {
       extension: "",
       phone: "",
       email: "",
-      companyId: isSuperAdmin ? companies[0]?.id || defaultCompanyId : user?.companyId || defaultCompanyId,
+      companyId: hasGlobalAccess ? companies[0]?.id || defaultCompanyId : user?.companyId || defaultCompanyId,
     });
   };
 
   const handleAddRamal = async (e: React.FormEvent) => {
     e.preventDefault();
-    const companyId = isSuperAdmin ? newRamal.companyId : user?.companyId || defaultCompanyId;
+    const companyId = hasGlobalAccess ? newRamal.companyId : user?.companyId || defaultCompanyId;
     if (!newRamal.name || !newRamal.sector || !newRamal.extension || !companyId) return;
     await createRamal({
       name: newRamal.name,
@@ -334,7 +333,7 @@ const Admin = () => {
   const handleEditRamalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingRamal) return;
-    const companyId = isSuperAdmin ? editingRamal.companyId : user?.companyId || editingRamal.companyId;
+    const companyId = hasGlobalAccess ? editingRamal.companyId : user?.companyId || editingRamal.companyId;
     if (!editingRamal.name || !editingRamal.sector || !editingRamal.extension || !companyId) return;
     await updateRamal(editingRamal.id, { ...editingRamal, companyId });
     setRamais([...mockRamais]);
@@ -349,13 +348,13 @@ const Admin = () => {
       imageUrl: "",
       category: "geral",
       content: "",
-      companyId: isSuperAdmin ? companies[0]?.id || defaultCompanyId : user?.companyId || defaultCompanyId,
+      companyId: hasGlobalAccess ? companies[0]?.id || defaultCompanyId : user?.companyId || defaultCompanyId,
     });
   };
 
   const handleAddTraining = async (e: React.FormEvent) => {
     e.preventDefault();
-    const companyId = isSuperAdmin ? newTraining.companyId : user?.companyId || defaultCompanyId;
+    const companyId = hasGlobalAccess ? newTraining.companyId : user?.companyId || defaultCompanyId;
     if (!newTraining.title || !newTraining.shortDescription || !newTraining.imageUrl || !newTraining.content || !companyId) return;
     await createTraining({
       title: newTraining.title,
@@ -378,7 +377,7 @@ const Admin = () => {
   const handleEditTrainingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTraining) return;
-    const companyId = isSuperAdmin ? editingTraining.companyId : user?.companyId || editingTraining.companyId;
+    const companyId = hasGlobalAccess ? editingTraining.companyId : user?.companyId || editingTraining.companyId;
     if (!editingTraining.title || !editingTraining.shortDescription || !editingTraining.imageUrl || !editingTraining.content || !companyId) return;
     await updateTraining(editingTraining.id, { ...editingTraining, companyId });
     setTrainings([...mockTrainings]);
@@ -387,8 +386,8 @@ const Admin = () => {
   };
 
   const getCompanyName = (id: string) => companies.find((c) => c.id === id)?.nome || "Empresa";
-  const accessibleRamais = isSuperAdmin ? ramais : ramais.filter((ramal) => !user?.companyId || ramal.companyId === user?.companyId);
-  const accessibleTrainings = isSuperAdmin ? trainings : trainings.filter((training) => !user?.companyId || training.companyId === user?.companyId);
+  const accessibleRamais = hasGlobalAccess ? ramais : ramais.filter((ramal) => !user?.companyId || ramal.companyId === user?.companyId);
+  const accessibleTrainings = hasGlobalAccess ? trainings : trainings.filter((training) => !user?.companyId || training.companyId === user?.companyId);
 
   return (
     <AppLayout>
@@ -452,7 +451,7 @@ const Admin = () => {
                       </div>
                       <div>
                         <Label>Empresa *</Label>
-                        {isSuperAdmin ? (
+                        {hasGlobalAccess ? (
                           <Select value={newUser.companyId} onValueChange={(value) => setNewUser({ ...newUser, companyId: value })}>
                             <SelectTrigger>
                               <SelectValue placeholder="Selecione a empresa" />
@@ -591,7 +590,7 @@ const Admin = () => {
                       </div>
                       <div>
                         <Label>Empresa</Label>
-                        {isSuperAdmin ? (
+                        {hasGlobalAccess ? (
                           <Select
                             value={editingUser.companyId ?? NO_COMPANY_VALUE}
                             onValueChange={(value) =>
@@ -1106,7 +1105,7 @@ const Admin = () => {
                         <Label>Email</Label>
                         <Input type="email" value={newRamal.email} onChange={(e) => setNewRamal({ ...newRamal, email: e.target.value })} />
                       </div>
-                      {isSuperAdmin ? (
+                      {hasGlobalAccess ? (
                         <div>
                           <Label>Empresa</Label>
                           <Select value={newRamal.companyId} onValueChange={(value) => setNewRamal({ ...newRamal, companyId: value })}>
@@ -1162,7 +1161,7 @@ const Admin = () => {
                                   {ramal.phone && <>Tel: {ramal.phone} • </>}
                                   {ramal.email}
                                 </div>
-                                {isSuperAdmin && (
+                                {hasGlobalAccess && (
                                   <div className="text-xs text-muted-foreground">Empresa: {getCompanyName(ramal.companyId)}</div>
                                 )}
                               </div>
@@ -1219,7 +1218,7 @@ const Admin = () => {
                         <Label>Email</Label>
                         <Input type="email" value={editingRamal.email || ""} onChange={(e) => setEditingRamal({ ...editingRamal, email: e.target.value })} />
                       </div>
-                      {isSuperAdmin ? (
+                      {hasGlobalAccess ? (
                         <div>
                           <Label>Empresa</Label>
                           <Select value={editingRamal.companyId} onValueChange={(value) => setEditingRamal({ ...editingRamal, companyId: value })}>
@@ -1323,7 +1322,7 @@ const Admin = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        {isSuperAdmin ? (
+                        {hasGlobalAccess ? (
                           <div>
                             <Label>Empresa</Label>
                             <Select value={newTraining.companyId} onValueChange={(value) => setNewTraining({ ...newTraining, companyId: value })}>
@@ -1379,7 +1378,7 @@ const Admin = () => {
                               <div className="text-xs text-muted-foreground">
                                 Categoria: {training.category} • {format(new Date(training.createdAt), "dd/MM/yyyy")}
                               </div>
-                              {isSuperAdmin && (
+                              {hasGlobalAccess && (
                                 <div className="text-xs text-muted-foreground">Empresa: {getCompanyName(training.companyId)}</div>
                               )}
                             </div>
@@ -1440,7 +1439,7 @@ const Admin = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        {isSuperAdmin ? (
+                        {hasGlobalAccess ? (
                           <div>
                             <Label>Empresa</Label>
                             <Select value={editingTraining.companyId} onValueChange={(value) => setEditingTraining({ ...editingTraining, companyId: value })}>

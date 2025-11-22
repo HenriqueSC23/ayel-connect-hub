@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Company, User } from "@/types";
 
 const Colaboradores = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [search, setSearch] = useState("");
 
   const companyMap = useMemo(() => {
@@ -21,7 +21,7 @@ const Colaboradores = () => {
   }, []);
 
   const normalizedUsers: User[] = useMemo(() => {
-    const canViewAllCompanies = user?.role === "superadmin";
+    const canViewAllCompanies = isAdmin;
     return mockUsers.filter((u) => {
       if (u.role !== "user") return false;
       if (canViewAllCompanies) return true;
@@ -30,7 +30,7 @@ const Colaboradores = () => {
       }
       return true;
     });
-  }, [user?.role, user?.companyId]);
+  }, [isAdmin, user?.companyId]);
 
   const filtered = normalizedUsers.filter((collaborator) => {
     const query = search.toLowerCase();

@@ -7,11 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { trainings as mockTrainings, companies as mockCompanies } from "@/data/mockData";
 import { Training, TrainingCategory } from "@/types";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Treinamentos = () => {
-  const { user } = useAuth();
-  const isSuperAdmin = user?.role === "superadmin";
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<TrainingCategory | "all">("all");

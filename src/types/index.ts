@@ -18,7 +18,7 @@ export type BlogCategory = "geral" | "vendedor" | "rh";
 export type TrainingCategory = "vendedor" | "tecnico" | "suporte" | "geral";
 
 // Tipo de usuÃ¡rio (define permissÃµes)
-export type UserRole = "superadmin" | "admin" | "user";
+export type UserRole = "admin" | "user";
 
 // ============================================
 // USUÃRIO
@@ -32,9 +32,9 @@ export interface User {
   phone?: string;                // Telefone corporativo ou celular de contato
   password: string;              // ATENÃÃO: No backend, sempre usar hash (bcrypt)
   fullName: string;              // Nome completo
-  role: UserRole;                // superadmin | admin | user
+  role: UserRole;                // admin | user
   category: UserCategory;        // Categoria do colaborador
-  companyId?: string;            // Empresa Ã  qual o usuÃ¡rio pertence (omitido para superadmin)
+  companyId?: string;            // Empresa Ã  qual o usuÃ¡rio pertence (admin pode ser global)
   setor?: string;                // Setor/departamento
   birthDate?: string;            // Data de nascimento (formato: YYYY-MM-DD)
   photoUrl?: string;             // URL da foto (armazenar no storage/S3)
