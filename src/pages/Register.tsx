@@ -12,16 +12,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserCategory } from "@/types";
-import logo from "@/assets/ayel-logo.jpg";
+import logo from "@/assets/tga-logo.png";
 
 const Register = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
     fullName: "",
     category: "" as UserCategory,
+    photoUrl: "",
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -46,6 +48,10 @@ const Register = () => {
       newErrors.email = "Email é obrigatório";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email inválido";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Telefone obrigatorio";
     }
 
     if (!formData.password) {
@@ -81,9 +87,11 @@ const Register = () => {
     const success = await register({
       username: formData.username,
       email: formData.email,
+      phone: formData.phone,
       password: formData.password,
       fullName: formData.fullName,
       category: formData.category,
+      photoUrl: formData.photoUrl || undefined,
       role: "user",  // Novos usuários sempre são "user", nunca "admin"
     });
 
@@ -99,7 +107,7 @@ const Register = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={logo} alt="Ayel" className="h-14" />
+            <img src={logo} alt="TGA Intranet" className="h-14" />
           </div>
           <div>
             <CardTitle className="text-2xl">Criar conta</CardTitle>
@@ -154,6 +162,32 @@ const Register = () => {
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email}</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="(11) 90000-0000"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                required
+              />
+              {errors.phone && (
+                <p className="text-sm text-destructive">{errors.phone}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="photoUrl">Foto de perfil (URL)</Label>
+              <Input
+                id="photoUrl"
+                type="url"
+                placeholder="https://exemplo.com/foto.jpg"
+                value={formData.photoUrl}
+                onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
+              />
             </div>
 
             <div className="space-y-2">

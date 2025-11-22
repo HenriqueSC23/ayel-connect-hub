@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { users as mockUsers, companies as mockCompanies } from "@/data/mockData";
-import { Search, Mail } from "lucide-react";
+import { Search, Mail, Phone } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Company, User } from "@/types";
@@ -35,11 +35,15 @@ const Colaboradores = () => {
   const filtered = normalizedUsers.filter((collaborator) => {
     const query = search.toLowerCase();
     const companyName = collaborator.companyId ? companyMap.get(collaborator.companyId)?.nome || "" : "";
+    const setor = collaborator.setor ? collaborator.setor.toLowerCase() : "";
+    const phone = collaborator.phone ? collaborator.phone.toLowerCase() : "";
     return (
       collaborator.fullName.toLowerCase().includes(query) ||
       collaborator.email.toLowerCase().includes(query) ||
       collaborator.category.toLowerCase().includes(query) ||
-      companyName.toLowerCase().includes(query)
+      companyName.toLowerCase().includes(query) ||
+      setor.includes(query) ||
+      phone.includes(query)
     );
   });
 
@@ -73,18 +77,28 @@ const Colaboradores = () => {
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <Avatar className="h-14 w-14">
-                  <AvatarImage src={person.photoUrl} />
+                  <AvatarImage src={person.photoUrl} className="object-cover object-center"/>
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {person.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 space-y-1">
                   <h3 className="font-semibold truncate">{person.fullName}</h3>
                   <p className="text-sm text-muted-foreground truncate flex items-center gap-1">
                     <Mail className="h-3 w-3" />
-                    {person.email}
+                    <a href={`mailto:${person.email}`} className="truncate hover:underline">
+                      {person.email}
+                    </a>
                   </p>
-                  <div className="flex gap-2 mt-2">
+                  {person.phone && (
+                    <p className="text-sm text-muted-foreground truncate flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      <a href={`tel:${person.phone.replace(/\D/g, "")}`} className="truncate hover:underline">
+                        {person.phone}
+                      </a>
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-2 pt-2">
                     <Badge variant="secondary">{categoryLabels[person.category] || person.category}</Badge>
                     <Badge variant="outline">
                       {person.companyId ? companyMap.get(person.companyId)?.nome || "Empresa" : "Sem empresa"}

@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, ArrowLeft } from "lucide-react";
-import logo from "@/assets/ayel-logo.jpg";
+import logo from "@/assets/tga-logo.png";
 
 const PasswordRecovery = () => {
   const [email, setEmail] = useState("");
@@ -59,7 +59,7 @@ const PasswordRecovery = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={logo} alt="Ayel" className="h-14" />
+            <img src={logo} alt="TGA Intranet" className="h-14" />
           </div>
           <div>
             <CardTitle className="text-2xl">Recuperar senha</CardTitle>

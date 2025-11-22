@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import logo from "@/assets/ayel-logo.jpg";
+import logo from "@/assets/tga-logo.png";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -48,7 +48,7 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={logo} alt="Ayel" className="h-16" />
+            <img src={logo} alt="TGA Intranet" className="h-16" />
           </div>
           <div>
             <CardTitle className="text-2xl">Bem-vindo de volta</CardTitle>
@@ -103,12 +103,6 @@ const Login = () => {
               {loading ? "Entrando..." : "Entrar"}
             </Button>
 
-            <div className="text-center text-sm text-muted-foreground">
-              Não tem uma conta?{" "}
-              <Link to="/cadastro" className="text-primary hover:underline font-medium">
-                Criar conta
-              </Link>
-            </div>
           </CardFooter>
         </form>
       </Card>

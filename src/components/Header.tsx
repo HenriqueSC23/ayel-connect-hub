@@ -29,7 +29,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useState } from "react";
-import logo from "@/assets/ayel-logo.jpg";
+import logo from "@/assets/tga-logo.png";
 
 export const Header = () => {
   const { user, logout, isAdmin } = useAuth();
@@ -67,7 +67,7 @@ export const Header = () => {
       <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-64 border-r bg-background/95 z-50">
         <div className="flex h-16 items-center px-4 border-b">
           <Link to="/inicio" className="flex items-center">
-            <img src={logo} alt="Ayel Segurança e Tecnologia" className="h-10" />
+            <img src={logo} alt="TGA Intranet" className="h-10" />
           </Link>
         </div>
 
@@ -155,7 +155,7 @@ export const Header = () => {
         <div className="container flex h-16 items-center justify-between px-4">
           {/* Logo */}
           <Link to="/inicio" className="flex items-center">
-            <img src={logo} alt="Ayel Segurança e Tecnologia" className="h-10" />
+            <img src={logo} alt="TGA Intranet" className="h-10" />
           </Link>
 
           {/* Mobile right controls */}

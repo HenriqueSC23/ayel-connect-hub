@@ -118,8 +118,10 @@ const Admin = () => {
   const [newUser, setNewUser] = useState({
     username: "",
     email: "",
+    phone: "",
     password: "",
     fullName: "",
+    photoUrl: "",
     role: "user" as UserRole,
     category: "outros" as UserCategory,
     companyId: defaultCompanyId,
@@ -219,8 +221,10 @@ const Admin = () => {
     const created = await createUser({
       username: newUser.username,
       email: newUser.email,
+      phone: newUser.phone,
       password: newUser.password,
       fullName: newUser.fullName,
+      photoUrl: newUser.photoUrl || undefined,
       role: newUser.role,
       category: newUser.category,
       companyId: enforcedCompanyId || undefined,
@@ -231,8 +235,10 @@ const Admin = () => {
     setNewUser({
       username: "",
       email: "",
+      phone: "",
       password: "",
       fullName: "",
+      photoUrl: "",
       role: "user",
       category: "outros",
       companyId: isSuperAdmin ? (companies[0]?.id || defaultCompanyId) : (user?.companyId || defaultCompanyId),
@@ -414,6 +420,14 @@ const Admin = () => {
                         <Input type="email" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} required />
                       </div>
                       <div>
+                        <Label>Foto de perfil (URL)</Label>
+                        <Input type="url" value={newUser.photoUrl} onChange={(e) => setNewUser({ ...newUser, photoUrl: e.target.value })} placeholder="https://exemplo.com/foto.jpg" />
+                      </div>
+                      <div>
+                        <Label>Telefone</Label>
+                        <Input type="tel" value={newUser.phone} onChange={(e) => setNewUser({...newUser, phone: e.target.value})} required />
+                      </div>
+                      <div>
                         <Label>Usuário</Label>
                         <Input value={newUser.username} onChange={(e) => setNewUser({...newUser, username: e.target.value})} required />
                       </div>
@@ -529,6 +543,27 @@ const Admin = () => {
                           value={editingUser.email}
                           onChange={(e) =>
                             setEditingUser((prev) => (prev ? ({ ...prev, email: e.target.value } as User) : prev))
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label>Foto de perfil (URL)</Label>
+                        <Input
+                          type="url"
+                          value={editingUser.photoUrl || ""}
+                          onChange={(e) =>
+                            setEditingUser((prev) => (prev ? ({ ...prev, photoUrl: e.target.value } as User) : prev))
+                          }
+                          placeholder="https://exemplo.com/foto.jpg"
+                        />
+                      </div>
+                      <div>
+                        <Label>Telefone</Label>
+                        <Input
+                          type="tel"
+                          value={editingUser.phone || ""}
+                          onChange={(e) =>
+                            setEditingUser((prev) => (prev ? ({ ...prev, phone: e.target.value } as User) : prev))
                           }
                         />
                       </div>
