@@ -9,57 +9,24 @@ import { trainings as mockTrainings, companies as mockCompanies } from "@/data/m
 import { Training, TrainingCategory } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 
-const resolveAllowedCategories = (userCategory?: string, userSector?: string, isAdmin?: boolean): Set<TrainingCategory> => {
-  if (isAdmin) {
-    return new Set(["vendedor", "tecnico", "suporte", "geral"]);
-  }
-
-  const allowed: Set<TrainingCategory> = new Set(["geral"]);
-  const category = (userCategory || "").toLowerCase();
-  const sector = (userSector || "").toLowerCase();
-
-  if (category === "vendedor") allowed.add("vendedor");
-  if (category === "tecnico") allowed.add("tecnico");
-  if (sector.includes("suporte") || category === "suporte") allowed.add("suporte");
-
-  return allowed;
-};
-
 const Treinamentos = () => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const isSuperAdmin = user?.role === "superadmin";
   const [trainings, setTrainings] = useState<Training[]>([]);
-  const [companyFilter, setCompanyFilter] = useState<string>(isSuperAdmin ? "all" : user?.companyId ?? "all");
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<TrainingCategory | "all">("all");
 
   useEffect(() => {
     setTrainings([...mockTrainings]);
   }, []);
 
-  useEffect(() => {
-    if (!isSuperAdmin && user?.companyId) {
-      setCompanyFilter(user.companyId);
-    }
-  }, [isSuperAdmin, user?.companyId]);
-
-  const allowedCategories = useMemo(
-    () => resolveAllowedCategories(user?.category, user?.setor, isAdmin),
-    [user?.category, user?.setor, isAdmin],
-  );
-
-  const resolvedCompanyId = useMemo(() => {
-    if (isSuperAdmin) {
-      return companyFilter === "all" ? undefined : companyFilter;
-    }
-    return user?.companyId;
-  }, [companyFilter, isSuperAdmin, user?.companyId]);
-
   const filteredTrainings = useMemo(() => {
     return trainings.filter((training) => {
-      const matchesCompany = resolvedCompanyId ? training.companyId === resolvedCompanyId : true;
-      const matchesCategory = allowedCategories.has(training.category);
+      const matchesCompany = companyFilter === "all" ? true : training.companyId === companyFilter;
+      const matchesCategory = categoryFilter === "all" ? true : training.category === categoryFilter;
       return matchesCompany && matchesCategory;
     });
-  }, [trainings, resolvedCompanyId, allowedCategories]);
+  }, [trainings, companyFilter, categoryFilter]);
 
   const getCompanyName = (companyId: string) =>
     mockCompanies.find((company) => company.id === companyId)?.nome || "Empresa";
@@ -71,13 +38,13 @@ const Treinamentos = () => {
         <p className="text-muted-foreground text-sm">Selecione um treinamento para acessar o conteúdo completo.</p>
       </div>
 
-      {isSuperAdmin && (
-        <Card className="border-dashed">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Filtrar por empresa</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="w-full max-w-sm">
+      <Card className="border-dashed">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Filtros</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 max-w-3xl">
+            <div>
               <Label className="text-sm mb-2 block">Empresa</Label>
               <Select value={companyFilter} onValueChange={setCompanyFilter}>
                 <SelectTrigger>
@@ -93,14 +60,30 @@ const Treinamentos = () => {
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
-      )}
+
+            <div>
+              <Label className="text-sm mb-2 block">Categoria</Label>
+              <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as TrainingCategory | "all")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
+                  <SelectItem value="vendedor">Vendedor</SelectItem>
+                  <SelectItem value="tecnico">Técnico</SelectItem>
+                  <SelectItem value="suporte">Suporte</SelectItem>
+                  <SelectItem value="geral">Geral</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {filteredTrainings.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            Nenhum treinamento disponível para o perfil selecionado.
+            Nenhum treinamento encontrado para os filtros selecionados.
           </CardContent>
         </Card>
       ) : (
@@ -122,7 +105,7 @@ const Treinamentos = () => {
               <CardContent className="mt-auto space-y-3">
                 <div className="flex flex-wrap items-center justify-between text-xs text-muted-foreground gap-2">
                   <span className="uppercase tracking-wide">Categoria: {training.category}</span>
-                  {(isAdmin || isSuperAdmin) && <span>{getCompanyName(training.companyId)}</span>}
+                  <span>{getCompanyName(training.companyId)}</span>
                 </div>
                 <Button asChild className="w-full">
                   <Link to={`/treinamentos/${training.id}`}>Acessar Treinamento</Link>
