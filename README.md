@@ -5,11 +5,11 @@ Ayel Connect Hub é a intranet multiempresas da Ayel Segurança e Tecnologia. O 
 
 - **Início / Mural:** posts, comunicados importantes e feed com filtros (função + empresa).
 - **Agenda / Calendário:** eventos segmentados com visualização mensal.
-- **Treinamentos:** cards chamativos com conteúdo detalhado por página.
+- **Aprenda mais:** cards chamativos com conteúdo detalhado por página.
 - **Ramais:** diretório de contatos dividido por setor.
 - **Atalhos:** links rápidos corporativos.
 - **Usuários / Colaboradores:** catálogo dos colaboradores com tags de função e empresa.
-- **Admin:** painel para CRUD de usuários, eventos, empresas, treinamentos, ramais etc.
+- **Admin:** painel para CRUD de usuários, eventos, empresas, conte?dos Aprenda mais, ramais etc.
 - **Multiempresa:** cada entidade conhece `companyId`/`companyTarget`, usuários possuem `role` + `companyId`, garantindo segmentação por empresa e função.
 
 ## Tecnologias e Stack
@@ -23,7 +23,7 @@ Ayel Connect Hub é a intranet multiempresas da Ayel Segurança e Tecnologia. O 
 
 ## Modelagem e Conceitos de ADS
 ### Camadas
-1. **Apresentação:** páginas em `src/pages` (Login, Dashboard, Agenda, Treinamentos etc.) usam componentes de layout (`AppLayout`, `Header`, `PostCard`).  
+1. **Apresentação:** páginas em `src/pages` (Login, Dashboard, Agenda, Aprenda mais etc.) usam componentes de layout (`AppLayout`, `Header`, `PostCard`).  
 2. **Modelo:** `src/types/index.ts` centraliza interfaces (`User`, `Post`, `Event`, `Training`, `Company`, `Ramal`, `Shortcut`).  
 3. **Dados:** `src/data/mockData.ts` fornece mocks e helpers CRUD (assíncronos para simular API). `AuthContext` orquestra autenticação, permissões e persistência.  
 
@@ -52,7 +52,7 @@ src/
 │   └── mockData.ts    # arrays e helpers CRUD (posts, events, users, etc.)
 ├── hooks/             # ex.: use-toast
 ├── lib/               # utilidades (cn, etc.)
-├── pages/             # rotas SPA (Login, Dashboard, Agenda, Treinamentos, Ramais, Admin...)
+├── pages/             # rotas SPA (Login, Dashboard, Agenda, Aprenda mais, Ramais, Admin...)
 ├── types/
 │   └── index.ts       # interfaces / tipos do domínio
 └── main.tsx           # bootstrap React Router + Providers
@@ -68,8 +68,8 @@ src/
 ### Multiempresa
 - Empresas vêm de `mockData.companies`; Admin pode criar/editar no painel.  
 - `companyId` em usuário determina pertencimento.  
-- `companyTarget`/`roleTarget` em posts, eventos, treinamentos e ramais controlam alcance.  
-- Padrão repetido em `getVisiblePosts`, Agenda, Treinamentos e Ramais.  
+- `companyTarget`/`roleTarget` em posts, eventos, conte?dos Aprenda mais e ramais controlam alcance.  
+- Padrão repetido em `getVisiblePosts`, Agenda, Aprenda mais e Ramais.  
 
 ### Posts / Mural
 - Campos: título (opcional), conteúdo, imagem, `roleTarget`, `companyTarget`, `isImportant`.  
@@ -81,7 +81,7 @@ src/
 - Componente `react-day-picker` mostra marcações, e o card “Eventos do mês” lista com tags de função/empresa.  
 - Admin possui filtros de função/empresa; usuários comuns seguem a regra automática.  
 
-### Treinamentos
+### Aprenda mais
 - Página `/treinamentos` lista cards grandes com imagem, descrição curta e botão “Acessar”.  
 - Cada item abre `/treinamentos/:id` com título, imagem, resumo e conteúdo longo.  
 - Categoria (`geral`, `vendedor`, `tecnico`, `suporte`) + `companyId` controlam visibilidade.  
@@ -93,13 +93,13 @@ src/
 - Admin tem CRUD completo (inclui seleção de empresa).  
 
 ### Admin
-- Painel dividido em cards (Usuários, Eventos, Treinamentos, Ramais, Empresas, Atalhos).  
+- Painel dividido em cards (Usuários, Eventos, Aprenda mais, Ramais, Empresas, Atalhos).  
 - Cada card possui botões “Adicionar” e “Editar” que abrem Dialogs shadcn.  
 - Formulários seguem padrão: selects para função/empresa e campos específicos de cada entidade.  
 
 ## Navegação e Responsividade
 - **Desktop:** sidebar fixa à esquerda (menu completo). Conteúdo ocupa área à direita. Páginas como Início usam grid 2 colunas (feed + sidebar).  
-- **Mobile:** sidebar some; surge bottom nav com ícones (Início, Agenda, Treinamentos, Ramais, Perfil). O item Perfil abre modal com todos os links + botão “Sair”. `AppLayout` adiciona `padding-bottom` para não esconder conteúdo atrás da barra.  
+- **Mobile:** sidebar some; surge bottom nav com ícones (Início, Agenda, Aprenda mais, Ramais, Perfil). O item Perfil abre modal com todos os links + botão “Sair”. `AppLayout` adiciona `padding-bottom` para não esconder conteúdo atrás da barra.  
 
 ## Como instalar e rodar o projeto
 ```bash
@@ -132,7 +132,7 @@ Pronto para deploy em serviços como Vercel, Netlify, Render, etc.
 - Próximo passo: substituir esses helpers por chamadas HTTP (`fetch`/`axios`) para um backend real.  
 - Sugestão: criar pasta `services/` ou `api/` para centralizar requests; usar React Query para caching e estados.  
 - `AuthContext` já explica como trocar `findUserByCredentials` por `POST /api/auth/login` com JWT.  
-- O front inteiro já espera dados via props/estado – basta ligar posts, eventos, treinamentos, ramais, usuários e empresas a endpoints reais.  
+- O front inteiro já espera dados via props/estado – basta ligar posts, eventos, conte?dos Aprenda mais, ramais, usuários e empresas a endpoints reais.  
 
 ## Boas Práticas e Pontos de Atenção
 1. **Componentização:** reaproveitar `AppLayout`, `Card`, `Dialog`, `Select` e demais componentes shadcn.  

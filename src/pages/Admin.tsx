@@ -1275,7 +1275,7 @@ const Admin = () => {
 
           <Card className="flex flex-col h-full min-h-[260px]">
             <CardHeader className="pb-4">
-              <CardTitle>Gerenciar Treinamentos</CardTitle>
+              <CardTitle>Gerenciar Aprenda mais</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col gap-4">
               <div className="flex flex-row flex-wrap items-start gap-3 w-full min-w-0">
@@ -1287,11 +1287,11 @@ const Admin = () => {
                   }}
                 >
                   <DialogTrigger asChild>
-                    <Button className="w-full sm:w-auto">Adicionar Treinamento</Button>
+                    <Button className="w-full sm:w-auto">Adicionar conteúdo</Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[650px] w-full">
                     <DialogHeader>
-                      <DialogTitle>Novo Treinamento</DialogTitle>
+                      <DialogTitle>Novo conte?do</DialogTitle>
                       <DialogDescription>Cadastre conteúdos para os colaboradores</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleAddTraining} className="space-y-3">
@@ -1350,7 +1350,7 @@ const Admin = () => {
                         <Textarea rows={6} value={newTraining.content} onChange={(e) => setNewTraining({ ...newTraining, content: e.target.value })} required />
                       </div>
                       <div className="flex justify-end">
-                        <Button type="submit">Salvar Treinamento</Button>
+                        <Button type="submit">Salvar conte?do</Button>
                       </div>
                     </form>
                   </DialogContent>
@@ -1359,17 +1359,17 @@ const Admin = () => {
                 <Dialog open={trainingListModalOpen} onOpenChange={setTrainingListModalOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full sm:w-auto">
-                      Editar Treinamentos
+                      Editar conte?dos
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[850px] w-full">
                     <DialogHeader>
-                      <DialogTitle>Treinamentos cadastrados</DialogTitle>
+                      <DialogTitle>Conte?dos cadastrados</DialogTitle>
                       <DialogDescription>Gerencie os conteúdos publicados</DialogDescription>
                     </DialogHeader>
                     <div className="mt-4 space-y-3 max-h-[60vh] overflow-auto">
                       {accessibleTrainings.length === 0 ? (
-                        <div className="text-sm text-muted-foreground">Nenhum treinamento disponível.</div>
+                        <div className="text-sm text-muted-foreground">Nenhum conte?do disponível.</div>
                       ) : (
                         accessibleTrainings.map((training) => (
                           <div key={training.id} className="flex flex-col gap-2 border rounded-lg p-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1407,8 +1407,8 @@ const Admin = () => {
               <Dialog open={trainingEditModalOpen} onOpenChange={(open) => { setTrainingEditModalOpen(open); if (!open) setEditingTraining(null); }}>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Editar Treinamento</DialogTitle>
-                    <DialogDescription>Atualize os dados do treinamento</DialogDescription>
+                    <DialogTitle>Editar conte?do</DialogTitle>
+                    <DialogDescription>Atualize os dados do conte?do</DialogDescription>
                   </DialogHeader>
                   {editingTraining ? (
                     <form onSubmit={handleEditTrainingSubmit} className="space-y-3">
@@ -1489,13 +1489,13 @@ const Admin = () => {
                       </div>
                     </form>
                   ) : (
-                    <div>Nenhum treinamento selecionado.</div>
+                    <div>Nenhum conte?do selecionado.</div>
                   )}
                 </DialogContent>
               </Dialog>
             </CardContent>
             <CardFooter className="justify-end border-t border-border/60 pt-4">
-              <span className="text-sm text-muted-foreground">Total: {accessibleTrainings.length} treinamento(s)</span>
+              <span className="text-sm text-muted-foreground">Total: {accessibleTrainings.length} conte?do(s)</span>
             </CardFooter>
           </Card>
       </div>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { trainings as mockTrainings, companies as mockCompanies } from "@/data/mockData";
 import { format } from "date-fns";
 
-const TreinamentoDetalhe = () => {
+const AprendaMaisDetalhe = () => {
   const { id } = useParams();
 
   const training = useMemo(() => mockTrainings.find((item) => item.id === id), [id]);
@@ -19,9 +19,9 @@ const TreinamentoDetalhe = () => {
       {!training ? (
         <Card>
           <CardContent className="py-12 text-center space-y-4">
-            <p className="text-muted-foreground">Treinamento não encontrado.</p>
+            <p className="text-muted-foreground">Conteúdo extra não encontrado.</p>
             <Button asChild variant="outline">
-              <Link to="/treinamentos">Voltar para Treinamentos</Link>
+              <Link to="/treinamentos">Voltar para Aprenda mais</Link>
             </Button>
           </CardContent>
         </Card>
@@ -42,7 +42,7 @@ const TreinamentoDetalhe = () => {
             <div className="whitespace-pre-line leading-relaxed text-sm text-foreground/90">{training.content}</div>
             <div className="pt-4">
               <Button asChild>
-                <Link to="/treinamentos">Voltar para Treinamentos</Link>
+                <Link to="/treinamentos">Voltar para Aprenda mais</Link>
               </Button>
             </div>
           </CardContent>
@@ -52,4 +52,4 @@ const TreinamentoDetalhe = () => {
   );
 };
 
-export default TreinamentoDetalhe;
+export default AprendaMaisDetalhe;

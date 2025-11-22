@@ -38,7 +38,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     () => [
       { label: "Início", icon: Home, to: "/inicio", key: "inicio" },
       { label: "Agenda", icon: Calendar, to: "/agenda", key: "agenda" },
-      { label: "Treinamentos", icon: BookOpen, to: "/treinamentos", key: "treinamentos" },
+      { label: "Aprenda mais", icon: BookOpen, to: "/treinamentos", key: "treinamentos" },
       { label: "Ramais", icon: Phone, to: "/ramais", key: "ramais" },
     ],
     [],
@@ -50,7 +50,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       { label: "Agenda", to: "/agenda", key: "agenda" },
       { label: "Aniversariantes", to: "/aniversariantes", key: "aniversariantes" },
       { label: "Colaboradores", to: "/colaboradores", key: "colaboradores" },
-      { label: "Treinamentos", to: "/treinamentos", key: "treinamentos" },
+      { label: "Aprenda mais", to: "/treinamentos", key: "treinamentos" },
       { label: "Ramais", to: "/ramais", key: "ramais" },
       { label: "Atalhos", to: "/atalhos", key: "atalhos" },
     ];

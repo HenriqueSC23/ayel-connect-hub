@@ -103,7 +103,7 @@ export const Header = () => {
           <Link to="/treinamentos">
             <Button variant={isActive("/treinamentos") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
               <BookOpen className="h-5 w-5" />
-              <span>Treinamentos</span>
+              <span>Aprenda mais</span>
             </Button>
           </Link>
 

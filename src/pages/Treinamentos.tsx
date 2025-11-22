@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { trainings as mockTrainings, companies as mockCompanies } from "@/data/mockData";
 import { Training, TrainingCategory } from "@/types";
 
-const Treinamentos = () => {
+const AprendaMais = () => {
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<TrainingCategory | "all">("all");
@@ -31,8 +31,8 @@ const Treinamentos = () => {
   return (
     <AppLayout maxWidthClass="max-w-6xl" contentClassName="space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold">Treinamentos</h1>
-        <p className="text-muted-foreground text-sm">Selecione um treinamento para acessar o conteúdo completo.</p>
+        <h1 className="text-3xl font-bold">Aprenda mais</h1>
+        <p className="text-muted-foreground text-sm">Encontre materiais rápidos e conteúdos extras para apoiar o dia a dia.</p>
       </div>
 
       <Card className="border-dashed">
@@ -80,7 +80,7 @@ const Treinamentos = () => {
       {filteredTrainings.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            Nenhum treinamento encontrado para os filtros selecionados.
+            Nenhum conteúdo encontrado para os filtros selecionados.
           </CardContent>
         </Card>
       ) : (
@@ -105,7 +105,7 @@ const Treinamentos = () => {
                   <span>{getCompanyName(training.companyId)}</span>
                 </div>
                 <Button asChild className="w-full">
-                  <Link to={`/treinamentos/${training.id}`}>Acessar Treinamento</Link>
+                  <Link to={`/treinamentos/${training.id}`}>Acessar conteúdo</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -116,4 +116,4 @@ const Treinamentos = () => {
   );
 };
 
-export default Treinamentos;
+export default AprendaMais;
