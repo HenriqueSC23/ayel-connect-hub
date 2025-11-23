@@ -200,7 +200,7 @@ const Dashboard = () => {
               Olá, {user?.fullName?.split(" ")[0]}! 👋
             </h1>
             <p className="text-muted-foreground">
-              Bem-vindo à TGA intranet
+              Bem-vindo à TGA Intranet
             </p>
           </div>
 

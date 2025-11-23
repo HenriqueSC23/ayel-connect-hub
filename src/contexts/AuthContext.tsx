@@ -42,7 +42,7 @@ import { useToast } from "@/hooks/use-toast";
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Chave para persistência no localStorage
-const STORAGE_KEY = "ayel_intranet_user";
+const STORAGE_KEY = "tga_intranet_user";
 
 // ============================================
 // PROVIDER DO CONTEXTO

@@ -171,7 +171,7 @@ const Register = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="joao.silva@ayel.com.br"
+                placeholder="joao.silva@tga.com.br"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required

@@ -1373,7 +1373,7 @@ const Admin = () => {
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[650px] w-full">
                     <DialogHeader>
-                      <DialogTitle>Novo conte?do</DialogTitle>
+                      <DialogTitle>Novo conteúdo</DialogTitle>
                       <DialogDescription>Cadastre conteúdos para os colaboradores</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleAddTraining} className="space-y-3">
@@ -1435,7 +1435,7 @@ const Admin = () => {
                         <Textarea rows={6} value={newTraining.content} onChange={(e) => setNewTraining({ ...newTraining, content: e.target.value })} required />
                       </div>
                       <div className="flex justify-end">
-                        <Button type="submit">Salvar conte?do</Button>
+                        <Button type="submit">Salvar conteúdo</Button>
                       </div>
                     </form>
                   </DialogContent>
@@ -1444,17 +1444,17 @@ const Admin = () => {
                 <Dialog open={trainingListModalOpen} onOpenChange={setTrainingListModalOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full sm:w-auto">
-                      Editar conte?dos
+                      Editar conteúdos
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[850px] w-full">
                     <DialogHeader>
-                      <DialogTitle>Conte?dos cadastrados</DialogTitle>
+                      <DialogTitle>Conteúdos cadastrados</DialogTitle>
                       <DialogDescription>Gerencie os conteúdos publicados</DialogDescription>
                     </DialogHeader>
                     <div className="mt-4 space-y-3 max-h-[60vh] overflow-auto">
                       {accessibleTrainings.length === 0 ? (
-                        <div className="text-sm text-muted-foreground">Nenhum conte?do disponível.</div>
+                        <div className="text-sm text-muted-foreground">Nenhum conteúdo disponível.</div>
                       ) : (
                         accessibleTrainings.map((training) => (
                           <div key={training.id} className="flex flex-col gap-2 border rounded-lg p-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1492,8 +1492,8 @@ const Admin = () => {
               <Dialog open={trainingEditModalOpen} onOpenChange={(open) => { setTrainingEditModalOpen(open); if (!open) setEditingTraining(null); }}>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Editar conte?do</DialogTitle>
-                    <DialogDescription>Atualize os dados do conte?do</DialogDescription>
+                    <DialogTitle>Editar conteúdo</DialogTitle>
+                    <DialogDescription>Atualize os dados do conteúdo</DialogDescription>
                   </DialogHeader>
                   {editingTraining ? (
                     <form onSubmit={handleEditTrainingSubmit} className="space-y-3">
@@ -1577,13 +1577,13 @@ const Admin = () => {
                       </div>
                     </form>
                   ) : (
-                    <div>Nenhum conte?do selecionado.</div>
+                    <div>Nenhum conteúdo selecionado.</div>
                   )}
                 </DialogContent>
               </Dialog>
             </CardContent>
             <CardFooter className="justify-end border-t border-border/60 pt-4">
-              <span className="text-sm text-muted-foreground">Total: {accessibleTrainings.length} conte?do(s)</span>
+              <span className="text-sm text-muted-foreground">Total: {accessibleTrainings.length} conteúdo(s)</span>
             </CardFooter>
           </Card>
 
