@@ -15,15 +15,16 @@ import { Comment, CompanyTarget, Post, PostRoleTarget } from "@/types";
 import { companies as mockCompanies } from "@/data/mockData";
 import { useAuth } from "@/contexts/AuthContext";
 import { comments as mockComments } from "@/data/mockData";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { getPostPublicationMeta } from "@/lib/posts";
 
 interface PostCardProps {
   post: Post;
 }
 
 export const PostCard: React.FC<PostCardProps> = ({ post }) => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isLiked, setIsLiked] = useState(post.likes.includes(user?.id || ""));
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [showComments, setShowComments] = useState(false);
@@ -85,12 +86,18 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
   };
 
   // Formata data relativa (ex: "há 2 horas")
-  const formatDate = (dateString: string) => {
-    return formatDistanceToNow(new Date(dateString), {
+  const formatRelativeDate = (date: Date) => {
+    return formatDistanceToNow(date, {
       addSuffix: true,
       locale: ptBR,
     });
   };
+  const publicationMeta = getPostPublicationMeta(post);
+  const { isScheduledFuture, scheduledDate, effectivePublishedAt } = publicationMeta;
+  const subtitleText =
+    isScheduledFuture && scheduledDate
+      ? `Programado para ${format(scheduledDate, "dd/MM/yyyy", { locale: ptBR })}`
+      : formatRelativeDate(effectivePublishedAt ?? new Date(post.createdAt));
 
   const getRoleLabel = (role: PostRoleTarget) => {
     const labels: Record<PostRoleTarget, string> = {
@@ -126,7 +133,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
             </Avatar>
             <div>
               <p className="font-semibold text-sm">{post.authorName}</p>
-              <p className="text-xs text-muted-foreground">{formatDate(post.createdAt)}</p>
+              <p className="text-xs text-muted-foreground">{subtitleText}</p>
             </div>
           </div>
         </div>
@@ -143,6 +150,27 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
             {getCompanyLabel(post.companyTarget)}
           </Badge>
         </div>
+        {isAdmin && (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            {isScheduledFuture ? (
+              <>
+                <Badge className="bg-amber-500/90 text-white">Agendado</Badge>
+                {scheduledDate && (
+                  <span>Programado para {format(scheduledDate, "dd/MM/yyyy", { locale: ptBR })}</span>
+                )}
+              </>
+            ) : (
+              <>
+                <Badge variant="outline" className="border-emerald-300 text-emerald-600">
+                  Publicado
+                </Badge>
+                {effectivePublishedAt && (
+                  <span>Publicado em {format(effectivePublishedAt, "dd/MM/yyyy", { locale: ptBR })}</span>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         {post.title && <h3 className="font-semibold text-lg">{post.title}</h3>}
       </CardHeader>
@@ -206,7 +234,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
                         <span className="text-muted-foreground">{comment.content}</span>
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {formatDate(comment.createdAt)}
+                        {formatRelativeDate(new Date(comment.createdAt))}
                       </p>
                     </div>
                   </div>

@@ -145,6 +145,10 @@ export const companies: Company[] = [
 // ============================================
 // BANCO DE DADOS: SELECT * FROM posts ORDER BY createdAt DESC
 // API Endpoint: GET /api/posts?category={userCategory}
+const postCreatedAt1 = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+const postCreatedAt2 = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
+const postCreatedAt3 = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
+
 export const posts: Post[] = [
   {
     id: "1",
@@ -158,7 +162,10 @@ export const posts: Post[] = [
     likes: ["2", "3", "4"],
     isImportant: true,
     companyId: "c1",
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: postCreatedAt1,
+    status: "published",
+    scheduledFor: null,
+    publishedAt: postCreatedAt1,
   },
   {
     id: "2",
@@ -172,7 +179,10 @@ export const posts: Post[] = [
     likes: ["3"],
     isImportant: true,
     companyId: "c1",
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: postCreatedAt2,
+    status: "published",
+    scheduledFor: null,
+    publishedAt: postCreatedAt2,
   },
   {
     id: "3",
@@ -183,7 +193,10 @@ export const posts: Post[] = [
     companyTarget: "c2",
     likes: ["2", "5"],
     companyId: "c2",
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+    createdAt: postCreatedAt3,
+    status: "published",
+    scheduledFor: null,
+    publishedAt: postCreatedAt3,
   },
 ];
 

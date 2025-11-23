@@ -62,6 +62,9 @@ export interface Post {
   likes: string[];               // Array de user IDs que curtiram
   createdAt: string;             // Data de criaÃ§Ã£o
   companyId?: string;            // Empresa proprietÃ¡ria do post
+  status?: "draft" | "scheduled" | "published"; // Estado do post
+  scheduledFor?: string | null;  // Data agendada para publica??o
+  publishedAt?: string | null;   // Data efetiva de publica??o
 }
 
 // ============================================

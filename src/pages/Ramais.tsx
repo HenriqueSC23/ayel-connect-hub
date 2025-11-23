@@ -1,36 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ramais as mockRamais, companies as mockCompanies } from "@/data/mockData";
-import { Ramal } from "@/types";
-import { useAuth } from "@/contexts/AuthContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
+import { companies as mockCompanies, ramais as mockRamais } from "@/data/mockData";
+import { Ramal } from "@/types";
 
 const Ramais = () => {
   const { user, isAdmin } = useAuth();
   const [ramaisList, setRamaisList] = useState<Ramal[]>([]);
-  const [companyFilter, setCompanyFilter] = useState<string>(
-    isAdmin ? "all" : user?.companyId ?? "all",
-  );
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
 
   useEffect(() => {
     setRamaisList([...mockRamais]);
   }, []);
 
-  useEffect(() => {
-    if (!isAdmin && user?.companyId) {
-      setCompanyFilter(user.companyId);
-    }
-  }, [isAdmin, user?.companyId]);
-
   const resolvedCompanyId = useMemo(() => {
-    if (isAdmin) {
-      return companyFilter === "all" ? undefined : companyFilter;
-    }
-    return user?.companyId || undefined;
-  }, [companyFilter, isAdmin, user?.companyId]);
+    return companyFilter === "all" ? undefined : companyFilter;
+  }, [companyFilter]);
 
   const filteredRamais = useMemo(() => {
     return ramaisList.filter((ramal) => {
@@ -75,31 +65,29 @@ const Ramais = () => {
         </p>
       </div>
 
-      {isAdmin && (
-        <Card className="border-dashed">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Filtrar por empresa</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="w-full max-w-sm">
-              <Label className="text-sm mb-2 block">Empresa</Label>
-              <Select value={companyFilter} onValueChange={setCompanyFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a empresa" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as empresas</SelectItem>
-                  {mockCompanies.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Card className="border-dashed">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Filtrar por empresa</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="w-full max-w-sm">
+            <Label className="text-sm mb-2 block">Empresa</Label>
+            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a empresa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as empresas</SelectItem>
+                {mockCompanies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       {filteredRamais.length === 0 ? (
         <Card>
@@ -108,45 +96,65 @@ const Ramais = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
-          {orderedSectors.map((sector) => (
-            <Card key={sector}>
-              <CardHeader>
-                <CardTitle className="text-xl">{sector}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {groupedBySector[sector].map((ramal) => (
-                  <div
-                    key={ramal.id}
-                    className="flex flex-col gap-1 border border-border/60 rounded-lg p-4 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
-                      <p className="font-semibold">{ramal.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Ramal {ramal.extension}
-                        {ramal.phone ? ` • Tel: ${ramal.phone}` : ""}
-                      </p>
-                      {ramal.email && (
-                        <p className="text-xs text-muted-foreground break-all">{ramal.email}</p>
-                      )}
-                    </div>
-                    <div className="text-right text-xs text-muted-foreground">
-                      {isAdmin && (
-                        <>
-                          <span className="font-medium block">{getCompanyName(ramal.companyId)}</span>
-                          <Separator className="my-1" />
-                        </>
-                      )}
-                      <span className="uppercase tracking-wide text-[10px] text-muted-foreground">
-                        {ramal.sector}
+        <Card className="border border-border/60">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-xl">Ramais por setor</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Selecione um setor para visualizar os contatos correspondentes.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="multiple" className="space-y-3">
+              {orderedSectors.map((sector) => (
+                <AccordionItem key={sector} value={sector} className="rounded-xl border border-border/70 px-4">
+                  <AccordionTrigger className="text-left text-base font-semibold">
+                    <div className="flex w-full items-center justify-between gap-4">
+                      <span>{sector}</span>
+                      <span className="text-sm font-normal text-muted-foreground">
+                        {groupedBySector[sector].length} contato(s)
                       </span>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-4">
+                    <div className="flex flex-col gap-3">
+                      {groupedBySector[sector].map((ramal) => (
+                        <div
+                          key={ramal.id}
+                          className="flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div className="space-y-1">
+                            <p className="text-base font-semibold text-foreground">{ramal.name}</p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <span className="font-medium">Ramal {ramal.extension}</span>
+                              {ramal.phone && <Separator orientation="vertical" className="h-4" />}
+                              {ramal.phone && <span>Tel: {ramal.phone}</span>}
+                            </div>
+                            {ramal.email && (
+                              <p className="text-xs text-muted-foreground break-all">{ramal.email}</p>
+                            )}
+                          </div>
+                          <div className="text-left text-xs text-muted-foreground sm:text-right">
+                            {isAdmin && (
+                              <>
+                                <span className="block text-sm font-semibold text-foreground">
+                                  {getCompanyName(ramal.companyId)}
+                                </span>
+                                <Separator className="my-2" />
+                              </>
+                            )}
+                            <span className="uppercase tracking-wide text-[11px] text-muted-foreground">
+                              {ramal.sector || "Outros"}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </CardContent>
+        </Card>
       )}
     </AppLayout>
   );

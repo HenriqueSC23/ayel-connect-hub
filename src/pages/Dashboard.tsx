@@ -9,7 +9,13 @@ import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { companies as mockCompanies, getVisiblePosts, posts as mockPosts } from "@/data/mockData";
+import {
+  collaborators as mockCollaborators,
+  companies as mockCompanies,
+  events as mockEvents,
+  getVisiblePosts,
+  posts as mockPosts,
+} from "@/data/mockData";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -28,11 +35,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { DayProps } from "react-day-picker";
 import { CompanyTarget, Post, PostRoleTarget } from "@/types";
-import { filterPostsByAdminSelectors, filterPostsForMobileView, getImportantPosts } from "@/lib/posts";
+import {
+  filterPostsByAdminSelectors,
+  filterPostsForMobileView,
+  getImportantPosts,
+  isPostReadyToShow,
+} from "@/lib/posts";
 import { Switch } from "@/components/ui/switch";
-import { formatDistanceToNow } from "date-fns";
+import { filterItemsForUser } from "@/lib/audience";
+import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const { user, isAdmin } = useAuth();
@@ -49,12 +66,64 @@ const Dashboard = () => {
     companyTarget: "all" as CompanyTarget,
     isImportant: false,
   });
+  const [publishMode, setPublishMode] = useState<"now" | "schedule">("now");
+  const [scheduledDate, setScheduledDate] = useState("");
+  const { toast } = useToast();
+  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const currentTime = useMemo(() => new Date(), []);
 
   const visiblePosts = getVisiblePosts(user);
+  const visibleEvents = useMemo(() => filterItemsForUser(mockEvents, user), [user]);
+  const eventDates = useMemo(
+    () =>
+      visibleEvents.map((e) => {
+        const [y, m, d] = e.date.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      }),
+    [visibleEvents],
+  );
+  const eventsByDate = useMemo(() => {
+    const map: Record<string, typeof mockEvents> = {};
+    visibleEvents.forEach((ev) => {
+      const key = ev.date;
+      if (!map[key]) map[key] = [];
+      map[key].push(ev);
+    });
+    return map;
+  }, [visibleEvents]);
+
+  const nextBirthday = useMemo(() => {
+    const today = new Date();
+    const todayY = today.getFullYear();
+    const todayStart = new Date(todayY, today.getMonth(), today.getDate());
+
+    const withNextDate = mockCollaborators
+      .filter((c) => !!c.birthDate)
+      .map((c) => {
+        const [, month, day] = (c.birthDate as string).split("-").map(Number);
+        let next = new Date(todayY, month - 1, day);
+        if (next < todayStart) {
+          next = new Date(todayY + 1, month - 1, day);
+        }
+        return { person: c, next };
+      });
+
+    if (withNextDate.length === 0) return null;
+
+    return withNextDate.reduce((closest, current) => {
+      if (!closest) return current;
+      return current.next < closest.next ? current : closest;
+    }, null as { person: (typeof mockCollaborators)[number]; next: Date } | null);
+  }, []);
+
+  const postsForUser = useMemo(
+    () => (isAdmin ? visiblePosts : visiblePosts.filter((post) => isPostReadyToShow(post, currentTime))),
+    [visiblePosts, isAdmin, currentTime],
+  );
 
   const basePosts = isAdmin
-    ? filterPostsByAdminSelectors(mockPosts, adminRoleFilter, adminCompanyFilter)
-    : visiblePosts;
+    ? filterPostsByAdminSelectors(postsForUser, adminRoleFilter, adminCompanyFilter)
+    : postsForUser;
 
   const importantPosts = useMemo(() => getImportantPosts(basePosts), [basePosts]);
 
@@ -67,6 +136,29 @@ const Dashboard = () => {
     e.preventDefault();
     if (!newPost.content.trim() || !user) return;
 
+    const now = new Date();
+    let scheduledISO: string | null = null;
+    if (publishMode === "schedule") {
+      if (!scheduledDate) {
+        toast({
+          title: "Defina a data de publicação",
+          description: "Escolha uma data futura para programar o comunicado.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const scheduleDate = new Date(`${scheduledDate}T09:00:00`);
+      if (scheduleDate <= now) {
+        toast({
+          title: "Data inválida",
+          description: "Selecione uma data futura para agendar a publicação.",
+          variant: "destructive",
+        });
+        return;
+      }
+      scheduledISO = scheduleDate.toISOString();
+    }
+
     const post: Post = {
       id: String(Date.now()),
       authorId: user.id,
@@ -78,7 +170,10 @@ const Dashboard = () => {
       companyTarget: newPost.companyTarget,
       isImportant: newPost.isImportant,
       likes: [],
-      createdAt: new Date().toISOString(),
+      createdAt: now.toISOString(),
+      status: publishMode === "schedule" ? "scheduled" : "published",
+      scheduledFor: scheduledISO,
+      publishedAt: publishMode === "schedule" ? null : now.toISOString(),
     };
 
     mockPosts.unshift(post);
@@ -91,6 +186,8 @@ const Dashboard = () => {
       companyTarget: "all",
       isImportant: false,
     });
+    setPublishMode("now");
+    setScheduledDate("");
     setDialogOpen(false);
   };
 
@@ -103,7 +200,7 @@ const Dashboard = () => {
               Olá, {user?.fullName?.split(" ")[0]}! 👋
             </h1>
             <p className="text-muted-foreground">
-              Bem-vindo à intranet da Ayel Segurança e Tecnologia
+              Bem-vindo à TGA intranet
             </p>
           </div>
 
@@ -214,6 +311,43 @@ const Dashboard = () => {
                     </Select>
                   </div>
 
+                  <div className="space-y-2">
+                    <Label>Publicação</Label>
+                    <RadioGroup
+                      value={publishMode}
+                      onValueChange={(value) => setPublishMode(value as "now" | "schedule")}
+                      className="grid gap-2 sm:grid-cols-2"
+                    >
+                      <div className="flex items-center gap-2 rounded-lg border border-border/70 bg-card px-3 py-2">
+                        <RadioGroupItem value="now" id="publish-now" />
+                        <Label htmlFor="publish-now" className="text-sm font-medium leading-none">
+                          Publicar agora
+                        </Label>
+                      </div>
+                      <div className="flex items-center gap-2 rounded-lg border border-border/70 bg-card px-3 py-2">
+                        <RadioGroupItem value="schedule" id="publish-schedule" />
+                        <Label htmlFor="publish-schedule" className="text-sm font-medium leading-none">
+                          Agendar
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                    {publishMode === "schedule" && (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="scheduledDate">Data programada</Label>
+                          <Input
+                            id="scheduledDate"
+                            type="date"
+                            min={todayStr}
+                            value={scheduledDate}
+                            onChange={(e) => setScheduledDate(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex items-center justify-between rounded-lg border border-border/60 px-4 py-3">
                     <div>
                       <p className="text-sm font-medium">Comunicado importante</p>
@@ -313,7 +447,7 @@ const Dashboard = () => {
         </div>
 
         <aside className="hidden lg:block">
-          <div className="sticky top-24 space-y-4">
+          <div className="space-y-3">
             <div className="rounded-xl border border-border/70 bg-card shadow-sm">
               <div className="border-b px-5 py-4">
                 <h2 className="text-sm font-semibold uppercase tracking-wide">
@@ -346,6 +480,88 @@ const Dashboard = () => {
                       </p>
                     </div>
                   ))
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/70 bg-card shadow-sm">
+              <div className="border-b px-4 py-3">
+                <h2 className="text-sm font-semibold uppercase tracking-wide">Agenda rápida</h2>
+                <p className="text-xs text-muted-foreground">Eventos marcados no calendário.</p>
+              </div>
+              <div className="px-3 py-3">
+                <TooltipProvider delayDuration={50}>
+                  <Calendar
+                    mode="single"
+                    modifiers={{ hasEvent: eventDates }}
+                    modifiersClassNames={{ hasEvent: "ring-2 ring-primary/50 rounded-full" }}
+                    locale={ptBR}
+                    className="w-full text-sm [&_.rdp-caption_label]:text-sm [&_.rdp-head_cell]:text-[11px] [&_.rdp-day]:h-8 [&_.rdp-day]:w-8 [&_.rdp-months]:w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full [&_.rdp-table]:table-fixed"
+                    components={{
+                      Day: (dayProps: DayProps) => {
+                        const { date, ...buttonProps } = dayProps;
+                        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+                          date.getDate(),
+                        ).padStart(2, "0")}`;
+                        const evs = eventsByDate[key] ?? [];
+                        const dayButton = (
+                          <button
+                            {...buttonProps}
+                            type="button"
+                            className="w-full h-full flex flex-col items-center justify-center gap-1"
+                          >
+                            <span className="text-[0.75rem]">{date.getDate()}</span>
+                            <div className="flex items-center gap-1">
+                              {evs.slice(0, 3).map((ev) => (
+                                <span
+                                  key={ev.id}
+                                  className="inline-block h-1.5 w-1.5 rounded-full"
+                                  style={{ backgroundColor: ev.color }}
+                                />
+                              ))}
+                              {evs.length > 3 && (
+                                <span className="text-[0.65rem] text-muted-foreground">+{evs.length - 3}</span>
+                              )}
+                            </div>
+                          </button>
+                        );
+
+                        if (evs.length === 0) return dayButton;
+
+                        return (
+                          <Tooltip>
+                            <TooltipTrigger asChild>{dayButton}</TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs space-y-1">
+                              {evs.map((ev) => (
+                                <p key={ev.id} className="text-xs leading-tight">
+                                  {ev.title}
+                                </p>
+                              ))}
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      },
+                    }}
+                  />
+                </TooltipProvider>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/70 bg-card shadow-sm">
+              <div className="border-b px-5 py-4">
+                <h2 className="text-sm font-semibold uppercase tracking-wide">Aniversariante do mês</h2>
+              </div>
+              <div className="px-5 py-4">
+                {!nextBirthday ? (
+                  <p className="text-sm text-muted-foreground">Nenhum aniversariante encontrado.</p>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold text-foreground">{nextBirthday.person.fullName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {nextBirthday.person.birthDate && format(nextBirthday.next, "dd/MM", { locale: ptBR })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{nextBirthday.person.setor || "Setor não informado"}</p>
+                  </div>
                 )}
               </div>
             </div>
