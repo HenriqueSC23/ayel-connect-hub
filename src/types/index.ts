@@ -15,7 +15,7 @@ export type UserCategory =
   | "outros";
 
 export type BlogCategory = "geral" | "vendedor" | "rh";
-export type TrainingCategory = "vendedor" | "tecnico" | "suporte" | "geral";
+export type TrainingCategory = "vendedor" | "tecnico" | "suporte" | "geral" | "rh";
 
 // Tipo de usuÃ¡rio (define permissÃµes)
 export type UserRole = "admin" | "user";
@@ -34,7 +34,7 @@ export interface User {
   fullName: string;              // Nome completo
   role: UserRole;                // admin | user
   category: UserCategory;        // Categoria do colaborador
-  companyId?: string;            // Empresa Ã  qual o usuÃ¡rio pertence (admin pode ser global)
+  companyId?: string;            // Empresa Ã  qual o usuÃ¡rio pertence (admin pode ser global)
   setor?: string;                // Setor/departamento
   birthDate?: string;            // Data de nascimento (formato: YYYY-MM-DD)
   photoUrl?: string;             // URL da foto (armazenar no storage/S3)

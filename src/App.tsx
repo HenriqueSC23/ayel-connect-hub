@@ -19,8 +19,8 @@ import Colaboradores from "./pages/Colaboradores";
 import Atalhos from "./pages/Atalhos";
 import Admin from "./pages/Admin";
 import Ramais from "./pages/Ramais";
-import AprendaMais from "./pages/Treinamentos";
-import AprendaMaisDetalhe from "./pages/TreinamentoDetalhe";
+import AprendaMais from "./pages/AprendaMais";
+import AprendaMaisDetalhe from "./pages/AprendaMaisDetalhe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

@@ -36,6 +36,7 @@ import {
   CompanyTarget,
   Ramal,
   Training,
+  TrainingCategory,
   User,
   Event,
   Collaborator,
@@ -46,6 +47,24 @@ import {
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type NewCollaboratorForm = {
+  fullName: string;
+  email: string;
+  category: UserCategory;
+  setor: string;
+  birthDate: string;
+  photoUrl: string;
+};
+
+type NewTrainingForm = {
+  title: string;
+  shortDescription: string;
+  imageUrl: string;
+  category: TrainingCategory;
+  content: string;
+  companyId: string;
+};
 
 const Admin = () => {
   const { user, isAdmin } = useAuth();
@@ -73,7 +92,7 @@ const Admin = () => {
 
   const NO_COMPANY_VALUE = "__none__";
 
-  const [newCollaborator, setNewCollaborator] = useState({
+  const [newCollaborator, setNewCollaborator] = useState<NewCollaboratorForm>({
     fullName: "",
     email: "",
     category: "outros",
@@ -87,12 +106,12 @@ const Admin = () => {
     const coll: Collaborator = {
       id: String(Date.now()),
       fullName: newCollaborator.fullName,
-      category: newCollaborator.category as any,
+      category: newCollaborator.category,
       email: newCollaborator.email,
       setor: newCollaborator.setor,
       birthDate: newCollaborator.birthDate,
       photoUrl: newCollaborator.photoUrl || undefined,
-    } as Collaborator;
+    };
     mockCollaborators.unshift(coll);
     setCollaborators([...mockCollaborators]);
     setNewCollaborator({ fullName: "", email: "", category: "outros", setor: "", birthDate: "", photoUrl: "" });
@@ -179,11 +198,11 @@ const Admin = () => {
   const [trainingCreateModalOpen, setTrainingCreateModalOpen] = useState(false);
   const [trainingEditModalOpen, setTrainingEditModalOpen] = useState(false);
   const [editingTraining, setEditingTraining] = useState<Training | null>(null);
-  const [newTraining, setNewTraining] = useState({
+  const [newTraining, setNewTraining] = useState<NewTrainingForm>({
     title: "",
     shortDescription: "",
     imageUrl: "",
-    category: "geral" as const,
+    category: "geral",
     content: "",
     companyId: defaultCompanyId,
   });
@@ -1310,7 +1329,10 @@ const Admin = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <Label>Categoria</Label>
-                          <Select value={newTraining.category} onValueChange={(value) => setNewTraining({ ...newTraining, category: value as any })}>
+                          <Select
+                            value={newTraining.category}
+                            onValueChange={(value) => setNewTraining({ ...newTraining, category: value as TrainingCategory })}
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Selecione a categoria" />
                             </SelectTrigger>
@@ -1427,7 +1449,10 @@ const Admin = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <Label>Categoria</Label>
-                          <Select value={editingTraining.category} onValueChange={(value) => setEditingTraining({ ...editingTraining, category: value as any })}>
+                          <Select
+                            value={editingTraining.category}
+                            onValueChange={(value) => setEditingTraining({ ...editingTraining, category: value as TrainingCategory })}
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Selecione a categoria" />
                             </SelectTrigger>

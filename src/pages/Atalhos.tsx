@@ -2,6 +2,7 @@
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { shortcuts } from "@/data/mockData";
+import type { Shortcut } from "@/types";
 import { ExternalLink, Users, Wrench, ShoppingCart, Mail, FolderOpen, Shield } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
@@ -15,11 +16,21 @@ const iconMap: Record<string, LucideIcon> = {
   Shield,
 };
 
+type ShortcutPlaceholder = {
+  id: string;
+  title: string;
+  url: string;
+  description: string;
+  placeholder: true;
+};
+
+type ShortcutDisplayItem = (Shortcut & { placeholder?: false }) | ShortcutPlaceholder;
+
 const Atalhos = () => {
   // Define setores desejados e tente mapear atalhos existentes para cada um
   const sectors = ["RH", "Técnico", "Vendas", "Administrador"];
 
-  const mapShortcutsForSector = (sector: string) => {
+  const mapShortcutsForSector = (sector: string): ShortcutDisplayItem[] => {
     const s = shortcuts.filter((sc) => {
       const t = sc.title.toLowerCase();
       const cat = (sc.category || "").toLowerCase();
@@ -32,7 +43,7 @@ const Atalhos = () => {
 
     // Sempre garanta pelo menos 3 itens — use placeholders se necessário
     const placeholdersNeeded = Math.max(0, 3 - s.length);
-    const placeholders = Array.from({ length: placeholdersNeeded }).map((_, i) => ({
+    const placeholders: ShortcutPlaceholder[] = Array.from({ length: placeholdersNeeded }).map((_, i) => ({
       id: `ph-${sector}-${i}`,
       title: "Em breve",
       url: "#",
@@ -57,8 +68,9 @@ const Atalhos = () => {
                 <AccordionContent>
                   {/* Container dos atalhos: coluna, todos com largura total */}
                   <div className="flex flex-col gap-3 w-full">
-                    {items.map((it: any) => {
-                      const Icon = it.icon ? (iconMap[it.icon] as any) || ExternalLink : ExternalLink;
+                    {items.map((it) => {
+                      const Icon =
+                        "icon" in it && it.icon ? iconMap[it.icon] ?? ExternalLink : ExternalLink;
                       return (
                         <a
                           key={it.id}
