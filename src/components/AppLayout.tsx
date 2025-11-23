@@ -2,7 +2,7 @@ import { ReactNode, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { cn } from "@/lib/utils";
-import { Home, Calendar, BookOpen, Phone } from "lucide-react";
+import { Home, Calendar, BookOpen, Phone, Paperclip } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -39,6 +39,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       { label: "Início", icon: Home, to: "/inicio", key: "inicio" },
       { label: "Agenda", icon: Calendar, to: "/agenda", key: "agenda" },
       { label: "Aprenda mais", icon: BookOpen, to: "/treinamentos", key: "treinamentos" },
+      { label: "Anexos", icon: Paperclip, to: "/anexos", key: "anexos" },
       { label: "Ramais", icon: Phone, to: "/ramais", key: "ramais" },
     ],
     [],
@@ -51,6 +52,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       { label: "Aniversariantes", to: "/aniversariantes", key: "aniversariantes" },
       { label: "Colaboradores", to: "/colaboradores", key: "colaboradores" },
       { label: "Aprenda mais", to: "/treinamentos", key: "treinamentos" },
+      { label: "Anexos", to: "/anexos", key: "anexos" },
       { label: "Ramais", to: "/ramais", key: "ramais" },
       { label: "Atalhos", to: "/atalhos", key: "atalhos" },
     ];

@@ -27,6 +27,7 @@ import {
   Search,
   Phone,
   BookOpen,
+  Paperclip,
 } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/tga-logo.png";
@@ -111,6 +112,13 @@ export const Header = () => {
             <Button variant={isActive("/ramais") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
               <Phone className="h-5 w-5" />
               <span>Ramais</span>
+            </Button>
+          </Link>
+
+          <Link to="/anexos">
+            <Button variant={isActive("/anexos") ? "secondary" : "ghost"} size="sm" className="w-full justify-start gap-3">
+              <Paperclip className="h-5 w-5" />
+              <span>Anexos</span>
             </Button>
           </Link>
 

@@ -30,6 +30,10 @@ import {
   createTraining,
   updateTraining,
   deleteTraining,
+  attachments as mockAttachments,
+  createAttachment,
+  updateAttachment,
+  deleteAttachment,
 } from "@/data/mockData";
 import {
   Company,
@@ -43,6 +47,7 @@ import {
   PostRoleTarget,
   UserRole,
   UserCategory,
+  Attachment,
 } from "@/types";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
@@ -76,6 +81,7 @@ const Admin = () => {
   const [companies, setCompanies] = useState<Company[]>([...mockCompanies]);
   const [ramais, setRamais] = useState<Ramal[]>([...mockRamais]);
   const [trainings, setTrainings] = useState<Training[]>([...mockTrainings]);
+  const [attachments, setAttachments] = useState<Attachment[]>([...mockAttachments]);
 
   const categoryOptions: { label: string; value: UserCategory }[] = [
     { label: "Vendedor", value: "vendedor" },
@@ -205,6 +211,17 @@ const Admin = () => {
     category: "geral",
     content: "",
     companyId: defaultCompanyId,
+  });
+  const [attachmentCreateModalOpen, setAttachmentCreateModalOpen] = useState(false);
+  const [attachmentListModalOpen, setAttachmentListModalOpen] = useState(false);
+  const [attachmentEditModalOpen, setAttachmentEditModalOpen] = useState(false);
+  const [editingAttachment, setEditingAttachment] = useState<Attachment | null>(null);
+  const [newAttachment, setNewAttachment] = useState({
+    title: "",
+    description: "",
+    category: "Documentos RH",
+    companyId: "all" as CompanyTarget,
+    fileUrl: "",
   });
 
   const handleAddCompany = async (e: React.FormEvent) => {
@@ -402,6 +419,52 @@ const Admin = () => {
     setTrainings([...mockTrainings]);
     setTrainingEditModalOpen(false);
     setEditingTraining(null);
+  };
+
+  const resetNewAttachment = () => {
+    setNewAttachment({
+      title: "",
+      description: "",
+      category: "Documentos RH",
+      companyId: "all",
+      fileUrl: "",
+    });
+  };
+
+  const handleAddAttachment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAttachment.title || !newAttachment.category || !newAttachment.fileUrl) return;
+    await createAttachment({
+      title: newAttachment.title,
+      description: newAttachment.description,
+      category: newAttachment.category,
+      companyId: newAttachment.companyId,
+      fileUrl: newAttachment.fileUrl,
+    });
+    setAttachments([...mockAttachments]);
+    setAttachmentCreateModalOpen(false);
+    resetNewAttachment();
+  };
+
+  const handleDeleteAttachment = async (id: string) => {
+    await deleteAttachment(id);
+    setAttachments([...mockAttachments]);
+  };
+
+  const handleEditAttachmentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAttachment) return;
+    if (!editingAttachment.title || !editingAttachment.category || !editingAttachment.fileUrl) return;
+    await updateAttachment(editingAttachment.id, {
+      title: editingAttachment.title,
+      description: editingAttachment.description,
+      category: editingAttachment.category,
+      companyId: editingAttachment.companyId,
+      fileUrl: editingAttachment.fileUrl,
+    });
+    setAttachments([...mockAttachments]);
+    setAttachmentEditModalOpen(false);
+    setEditingAttachment(null);
   };
 
   const getCompanyName = (id: string) => companies.find((c) => c.id === id)?.nome || "Empresa";
@@ -1521,6 +1584,210 @@ const Admin = () => {
             </CardContent>
             <CardFooter className="justify-end border-t border-border/60 pt-4">
               <span className="text-sm text-muted-foreground">Total: {accessibleTrainings.length} conte?do(s)</span>
+            </CardFooter>
+          </Card>
+
+          <Card className="flex flex-col h-full min-h-[260px]">
+            <CardHeader className="pb-4">
+              <CardTitle>Gerenciar Anexos</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col gap-4">
+              <div className="flex flex-row flex-wrap items-start gap-3 w-full min-w-0">
+                <Dialog
+                  open={attachmentCreateModalOpen}
+                  onOpenChange={(open) => {
+                    setAttachmentCreateModalOpen(open);
+                    if (!open) resetNewAttachment();
+                  }}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="w-full sm:w-auto">Adicionar anexo</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px] w-full">
+                    <DialogHeader>
+                      <DialogTitle>Novo anexo</DialogTitle>
+                      <DialogDescription>Cadastre documentos e arquivos importantes.</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleAddAttachment} className="space-y-3">
+                      <div>
+                        <Label>Título</Label>
+                        <Input value={newAttachment.title} onChange={(e) => setNewAttachment({ ...newAttachment, title: e.target.value })} required />
+                      </div>
+                      <div>
+                        <Label>Descrição</Label>
+                        <Textarea rows={3} value={newAttachment.description} onChange={(e) => setNewAttachment({ ...newAttachment, description: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label>Categoria</Label>
+                        <Input value={newAttachment.category} onChange={(e) => setNewAttachment({ ...newAttachment, category: e.target.value })} required />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <Label>Empresa</Label>
+                          <Select
+                            value={newAttachment.companyId}
+                            onValueChange={(value) => setNewAttachment({ ...newAttachment, companyId: value as CompanyTarget })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Todas as empresas</SelectItem>
+                              {mockCompanies.map((company) => (
+                                <SelectItem key={company.id} value={company.id}>
+                                  {company.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>URL do arquivo</Label>
+                          <Input
+                            type="url"
+                            value={newAttachment.fileUrl}
+                            onChange={(e) => setNewAttachment({ ...newAttachment, fileUrl: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <Button type="submit" className="w-full">
+                        Salvar anexo
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={attachmentListModalOpen} onOpenChange={setAttachmentListModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full sm:w-auto">Editar anexos</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[750px] w-full">
+                    <DialogHeader>
+                      <DialogTitle>Anexos cadastrados</DialogTitle>
+                      <DialogDescription>Edite ou exclua anexos existentes.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                      {attachments.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-6">Nenhum anexo cadastrado.</p>
+                      ) : (
+                        attachments.map((attachment) => (
+                          <div key={attachment.id} className="rounded-lg border border-border/60 p-4 flex flex-col gap-2">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <p className="font-semibold text-sm">{attachment.title}</p>
+                                <p className="text-xs text-muted-foreground">{attachment.category}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingAttachment({ ...attachment });
+                                    setAttachmentEditModalOpen(true);
+                                  }}
+                                >
+                                  Editar
+                                </Button>
+                                <Button variant="destructive" size="sm" onClick={() => handleDeleteAttachment(attachment.id)}>
+                                  Excluir
+                                </Button>
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {attachment.companyId === "all" ? "Todas as empresas" : getCompanyName(attachment.companyId)}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog
+                  open={attachmentEditModalOpen}
+                  onOpenChange={(open) => {
+                    setAttachmentEditModalOpen(open);
+                    if (!open) setEditingAttachment(null);
+                  }}
+                >
+                  <DialogContent className="sm:max-w-[600px] w-full">
+                    <DialogHeader>
+                      <DialogTitle>Editar anexo</DialogTitle>
+                      <DialogDescription>Atualize as informações do anexo selecionado.</DialogDescription>
+                    </DialogHeader>
+                    {editingAttachment && (
+                      <form onSubmit={handleEditAttachmentSubmit} className="space-y-3">
+                        <div>
+                          <Label>Título</Label>
+                          <Input
+                            value={editingAttachment.title}
+                            onChange={(e) => setEditingAttachment({ ...editingAttachment, title: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label>Descrição</Label>
+                          <Textarea
+                            rows={3}
+                            value={editingAttachment.description || ""}
+                            onChange={(e) => setEditingAttachment({ ...editingAttachment, description: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <Label>Categoria</Label>
+                          <Input
+                            value={editingAttachment.category}
+                            onChange={(e) => setEditingAttachment({ ...editingAttachment, category: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <Label>Empresa</Label>
+                            <Select
+                              value={editingAttachment.companyId}
+                              onValueChange={(value) =>
+                                setEditingAttachment({
+                                  ...editingAttachment,
+                                  companyId: value as CompanyTarget,
+                                } as Attachment)
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">Todas as empresas</SelectItem>
+                                {mockCompanies.map((company) => (
+                                  <SelectItem key={company.id} value={company.id}>
+                                    {company.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>URL do arquivo</Label>
+                            <Input
+                              type="url"
+                              value={editingAttachment.fileUrl}
+                              onChange={(e) => setEditingAttachment({ ...editingAttachment, fileUrl: e.target.value })}
+                              required
+                            />
+                          </div>
+                        </div>
+                        <Button type="submit" className="w-full">
+                          Salvar alterações
+                        </Button>
+                      </form>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardContent>
+            <CardFooter className="justify-end border-t border-border/60 pt-4">
+              <span className="text-sm text-muted-foreground">Total: {attachments.length} anexo(s)</span>
             </CardFooter>
           </Card>
       </div>

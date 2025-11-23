@@ -99,6 +99,19 @@ export interface Training {
 }
 
 // ============================================
+// ANEXO / ARQUIVO
+// ============================================
+export interface Attachment {
+  id: string;
+  title: string;
+  description?: string;
+  category: string;
+  companyId: CompanyTarget;
+  fileUrl: string;
+  createdAt: string;
+}
+
+// ============================================
 // COMENTÃRIO
 // ============================================
 // Representa um comentÃ¡rio em um post

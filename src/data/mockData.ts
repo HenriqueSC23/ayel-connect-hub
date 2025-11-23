@@ -34,6 +34,7 @@ import {
   Ramal,
   Training,
   Company,
+  Attachment,
 } from "@/types";
 import { filterItemsForUser } from "@/lib/audience";
 
@@ -492,6 +493,39 @@ export const trainings: Training[] = [
 ];
 
 // ============================================
+// ANEXOS / ARQUIVOS
+// ============================================
+export const attachments: Attachment[] = [
+  {
+    id: "a1",
+    title: "Manual do Colaborador",
+    description: "Documento com políticas internas e procedimentos gerais.",
+    category: "Políticas Internas",
+    companyId: "all",
+    fileUrl: "https://example.com/manual-colaborador.pdf",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "a2",
+    title: "Formulário de Solicitação Comercial",
+    description: "Modelo de formulário para propostas de vendas.",
+    category: "Formulários Vendas",
+    companyId: "c2",
+    fileUrl: "https://example.com/formulario-vendas.pdf",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "a3",
+    title: "Checklist de Instalação",
+    description: "Procedimentos técnicos para instalação de equipamentos.",
+    category: "Manuais Técnicos",
+    companyId: "c1",
+    fileUrl: "https://example.com/checklist-instalacao.pdf",
+    createdAt: new Date().toISOString(),
+  },
+];
+
+// ============================================
 // HELPERS: Companies CRUD (in-memory/mock)
 // ============================================
 export const createCompany = async (companyData: Omit<Company, "id" | "createdAt">): Promise<Company> => {
@@ -548,6 +582,38 @@ export const deleteRamal = async (id: string): Promise<boolean> => {
   const idx = ramais.findIndex((r) => r.id === id);
   if (idx === -1) return false;
   ramais.splice(idx, 1);
+  return true;
+};
+
+// ============================================
+// HELPERS: Anexos CRUD (in-memory/mock)
+// ============================================
+export const createAttachment = async (
+  attachmentData: Omit<Attachment, "id" | "createdAt">,
+): Promise<Attachment> => {
+  await simulateNetworkDelay();
+  const newAttachment: Attachment = {
+    ...attachmentData,
+    id: `a${attachments.length + 1}`,
+    createdAt: new Date().toISOString(),
+  };
+  attachments.unshift(newAttachment);
+  return newAttachment;
+};
+
+export const updateAttachment = async (id: string, data: Partial<Attachment>): Promise<Attachment | null> => {
+  await simulateNetworkDelay();
+  const idx = attachments.findIndex((a) => a.id === id);
+  if (idx === -1) return null;
+  attachments[idx] = { ...attachments[idx], ...data };
+  return attachments[idx];
+};
+
+export const deleteAttachment = async (id: string): Promise<boolean> => {
+  await simulateNetworkDelay();
+  const idx = attachments.findIndex((a) => a.id === id);
+  if (idx === -1) return false;
+  attachments.splice(idx, 1);
   return true;
 };
 
