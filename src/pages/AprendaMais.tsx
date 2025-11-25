@@ -67,7 +67,7 @@ const AprendaMais = () => {
     mockCompanies.find((company) => company.id === companyId)?.nome || "Empresa";
 
   return (
-    <AppLayout maxWidthClass="max-w-6xl" contentClassName="space-y-6">
+    <AppLayout maxWidthClass="max-w-6xl" contentClassName="space-y-6 lg:min-h-[calc(100vh-125px)]">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Aprenda mais</h1>
         <p className="text-muted-foreground text-sm">

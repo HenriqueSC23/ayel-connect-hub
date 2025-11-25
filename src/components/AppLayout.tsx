@@ -3,6 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { cn } from "@/lib/utils";
 import { Home, Calendar, BookOpen, Phone, Paperclip } from "lucide-react";
+import ayelLogo from "@/assets/ayel-logo.png";
+import azulLogo from "@/assets/azul-logo.png";
+import condoshopLogo from "@/assets/condoshop-logo.png";
+import pageLevLogo from "@/assets/page-lev-logo.png";
+import redeLogo from "@/assets/rede-logo.png";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -74,6 +79,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         >
           {children}
         </div>
+        <footer className="w-full px-8 pb-24 sm:pb-8 mt-4 pt-0">
+          <div className="border-t border-border/60 pt-8">
+            <div className="w-full flex flex-col items-center justify-center gap-6 sm:flex-row sm:flex-wrap sm:justify-between">
+              {[ayelLogo, azulLogo, condoshopLogo, pageLevLogo, redeLogo].map((logoSrc, idx) => (
+                <div key={idx} className="flex items-center justify-center">
+                  <img src={logoSrc} alt="Logo do grupo TGA" className="h-[60px] w-auto object-contain" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </footer>
       </div>
       <div className="md:hidden">
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur">

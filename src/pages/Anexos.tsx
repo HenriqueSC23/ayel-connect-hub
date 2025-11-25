@@ -67,7 +67,7 @@ const Anexos = () => {
   };
 
   return (
-    <AppLayout maxWidthClass="max-w-6xl" contentClassName="space-y-6">
+    <AppLayout maxWidthClass="max-w-6xl" contentClassName="space-y-6 lg:min-h-[calc(100vh-125px)]">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Anexos</h1>
         <p className="text-sm text-muted-foreground">

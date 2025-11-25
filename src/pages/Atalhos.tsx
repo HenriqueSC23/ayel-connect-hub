@@ -55,7 +55,7 @@ const Atalhos = () => {
   };
 
   return (
-    <AppLayout maxWidthClass="max-w-4xl">
+    <AppLayout maxWidthClass="max-w-4xl" contentClassName="lg:min-h-[calc(100vh-125px)]">
       <h1 className="text-3xl font-bold mb-6">Links Rápidos</h1>
 
       <div className="space-y-4">

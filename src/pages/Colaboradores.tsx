@@ -56,7 +56,7 @@ const Colaboradores = () => {
   };
 
   return (
-    <AppLayout maxWidthClass="max-w-4xl">
+    <AppLayout maxWidthClass="max-w-4xl" contentClassName="lg:min-h-[calc(100vh-125px)]">
       <h1 className="text-3xl font-bold mb-6">Colaboradores</h1>
 
       <div className="mb-6">
