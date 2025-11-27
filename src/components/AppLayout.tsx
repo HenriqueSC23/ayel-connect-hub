@@ -38,6 +38,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const logos = useMemo(() => [ayelLogo, azulLogo, condoshopLogo, pageLevLogo, redeLogo], []);
 
   const mobileNavItems: MobileNavItem[] = useMemo(
     () => [
@@ -69,7 +70,25 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="md:pl-64 pt-16 md:pt-6">
+      <div className="md:pl-64 pt-0 md:pt-0">
+        <div className="w-full border-b border-border/60 bg-background mb-6 ">
+          <div className="hidden md:flex w-full items-center justify-between gap-6 p-6">
+            {logos.map((logoSrc, idx) => (
+              <div key={idx} className="flex items-center justify-center">
+                <img src={logoSrc} alt="Logo do grupo TGA" className="h-[60px] w-auto object-contain" />
+              </div>
+            ))}
+          </div>
+          <div className="md:hidden w-full overflow-hidden px-4 py-6">
+            <div className="flex items-center gap-6 animate-logo-marquee-mobile">
+              {[...logos, ...logos].map((logoSrc, idx) => (
+                <div key={idx} className="flex items-center justify-center">
+                  <img src={logoSrc} alt="Logo do grupo TGA" className="h-[60px] max-w-[200px] w-auto object-contain" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
         <div
           className={cn(
             "w-full px-4 pb-24 md:pb-10 mx-auto transition-all",
@@ -79,17 +98,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         >
           {children}
         </div>
-        <footer className="w-full px-8 pb-24 sm:pb-8 mt-4 pt-0">
-          <div className="border-t border-border/60 pt-8">
-            <div className="w-full flex flex-col items-center justify-center gap-6 sm:flex-row sm:flex-wrap sm:justify-between">
-              {[ayelLogo, azulLogo, condoshopLogo, pageLevLogo, redeLogo].map((logoSrc, idx) => (
-                <div key={idx} className="flex items-center justify-center">
-                  <img src={logoSrc} alt="Logo do grupo TGA" className="h-[60px] w-auto object-contain" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </footer>
       </div>
       <div className="md:hidden">
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur">

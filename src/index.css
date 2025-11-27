@@ -114,3 +114,17 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes logo-marquee-mobile {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-logo-marquee-mobile {
+  min-width: 200%;
+  animation: logo-marquee-mobile 24s linear infinite;
+}
